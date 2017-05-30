@@ -103,7 +103,6 @@ define(
                     jQuery("#transID").val(event.data["TRANS_ID"]);
                     jQuery("#paymentType").val(event.data["PAYMENT_TYPE"]);
                     jQuery('#paymentAcctMask').val(event.data["PAYMENT_ACCOUNT"]);
-                    console.log(event.data);
                     this.authCode = event.data["AUTH_CODE"];
                     this.avs = event.data["AVS"];
                     this.cvv2 = event.data["CVV2"];
@@ -144,6 +143,9 @@ define(
                     "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                     "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
                     "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
+                    $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
+                        iframeFields += '&' + key + '=' + encodeURIComponent(value);
+                    });
                 $("#iframe").attr('src', window.checkoutConfig.payment.bluepay_payment.iframeUrl + iframeFields);
                 $("#iframe").height(230);
                 $("#iframe").width(600);
@@ -430,6 +432,9 @@ define(
                     "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                     "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
                     "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
+                    $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
+                        iframeFields += '&' + key + '=' + encodeURIComponent(value);
+                    });
                     $("#iframe").attr('src', window.checkoutConfig.payment.bluepay_payment.iframeUrl + iframeFields + iframePaymentFields);
                     $("#iframe").height(230);
                     $("#iframe").width(600);

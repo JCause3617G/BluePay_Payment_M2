@@ -453,13 +453,25 @@ $payment->setCcType($result->getCardType());
         $session = $this->checkoutSession;
 
         $comment = "";
-
+        $i = 1;
         foreach ($session->getQuote()->getAllItems() as $item) {
             $comment .= $item->getQty() . ' ';
             $comment .= '[' . $item->getSku() . ']' . ' ';
             $comment .= $item->getName() . ' ';
             $comment .= $item->getDescription() . ' ';
-            $comment .= $item->getAmount() . ' ';
+            $comment .= $item->getPrice() . ' ';
+
+            $request["lv3_item".$i."_product_code"] = $item->getSku();
+            $request["lv3_item".$i."_unit_cost"] = $item->getPrice();
+            $request["lv3_item".$i."_quantity"] = $item->getQty();
+            $request["lv3_item".$i."_item_descriptor"] = $item->getName();
+            $request["lv3_item".$i."_measure_units"] = 'EA';
+            $request["lv3_item".$i."_commodity_code"] = '-';
+            $request["lv3_item".$i."_tax_amount"] = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
+            $request["lv3_item".$i."_tax_rate"] = $item->getTaxPercent() . '%';
+            $request["lv3_item".$i."_item_discount"] = '';
+            $request["lv3_item".$i."_line_item_total"] = $item->getPrice() * $item->getQty();
+            $i++;
         }
 
         if (!empty($order)) {
@@ -507,6 +519,7 @@ $payment->setCcType($result->getCardType());
     {
         $info = $this->getInfoInstance();
         $result = $this->responseFactory->create();
+
         if ($info->getIframe() == "1") {
             $result->setResult($info->getResult());
             $result->setMessage($info->getMessage());
@@ -525,7 +538,6 @@ $payment->setCcType($result->getCardType());
             $result->setToken($info->getAdditionalInformation('token'));
             $result->setPaymentAccountMask($info->getAdditionalInformation('payment_account_mask'));
             $result->setCcNumber($info->getAdditionalInformation('cc_number'));
-            error_log(print_r($info->getAdditionalInformation(),1));
             $result->setCcExpires($info->getAdditionalInformation('cc_exp_month') . $info->getAdditionalInformation('cc_exp_year'));
             $result->setPaymentType($info->getAdditionalInformation('payment_type'));
             $result->setCardType($info->getAdditionalInformation('card_type'));
@@ -838,7 +850,6 @@ $payment->setCcType($result->getCardType());
                 Observer\DataAssignObserver::DATA_CODE => $data
             ]
         );
-
         $infoInstance = $this->getInfoInstance();
         $infoInstance->setAdditionalInformation('token', $infoInstance->getToken());
         $infoInstance->setAdditionalInformation('trans_id', $infoInstance->getTransID());
@@ -913,7 +924,6 @@ $payment->setCcType($result->getCardType());
         $newToken = $result->getRrno();
         $newCardType = $result->getCardType();
         $newPaymentAccount = $result->getPaymentAccountMask();
-        error_log($result->getCcExpires());
         $newCcExpMonth = substr($result->getCcExpires(), 0, 2);
         $newCcExpYear = substr($result->getCcExpires(), 2, 2);
         $paymentType = $info->getPaymentType() != "" ? $info->getPaymentType() : $info->getAdditionalInformation('payment_type');
