@@ -97,7 +97,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
      *
      * @var array
      */
-    public $_debugReplacePrivateDataKeys = ['ach_account'];
+    public $_debugReplacePrivateDataKeys = ['ach_account', 'cc_num'];
 
     private $customerRegistry;
 
@@ -616,6 +616,11 @@ $payment->setCcType($result->getCardType());
                 $debugData['result'] = $result->getData();
                 $this->_debug($debugData);
             }
+        }
+        if (($info->getIframe() == "1" || $info->getAdditionalInformation('iframe') == "1") && $this->getConfigData('debug')) {
+            $debugData = clone $result;
+            $debugData = ['result' => $debugData];
+            $this->_debug($debugData);
         }
         if ($result->getResult() == 'APPROVED') {
             $this->saveCustomerPaymentInfo($result);

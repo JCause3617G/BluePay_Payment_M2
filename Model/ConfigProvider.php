@@ -120,13 +120,13 @@ class ConfigProvider implements ConfigProviderInterface
         } else {
             $customer = $this->customerRegistry->retrieve($customerId);
             $customerData = $customer->getDataModel();
-            $name1 = $customerData->getAddresses()[0]->getFirstName();
-            $name2 = $customerData->getAddresses()[0]->getLastName();
-            $company = $customerData->getAddresses()[0]->getCompany() != null ? $customerData->getAddresses()[0]->getCompany() : '';
-            $street = $customerData->getAddresses()[0]->getStreet()[0];
-            $city = $customerData->getAddresses()[0]->getCity() != null ? $customerData->getAddresses()[0]->getCity() : '';
-            $state = $customerData->getAddresses()[0]->getRegion()->getRegionCode();
-            $zip = $customerData->getAddresses()[0]->getPostCode();
+            $name1 = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getFirstName() : '';
+            $name2 = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getLastName() : '';
+            $company = $customerData->getAddresses() != null && $customerData->getAddresses()[0]->getCompany() != null ? $customerData->getAddresses()[0]->getCompany() : '';
+            $street = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getStreet()[0] : '';
+            $city = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getCity() : '';
+            $state = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getRegion()->getRegionCode() : '';
+            $zip = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getPostCode() : '';
             $email = $customerData->getEmail();
         }
 

@@ -59,7 +59,7 @@ class DataAssignObserver extends AbstractDataAssignObserver
         $payment->setPaymentType($additionalData->getData('payment_type'));
         $payment->setIframe($additionalData->getData('iframe'));
         $payment->setCcNumber($additionalData->getData('cc_number'));
-        //$payment->setCcCid($object->getCcCid());
+        $payment->setCcCid($additionalData->getData('cc_cid'));
         $payment->setEcheckRoutingNumber($additionalData->getData('echeck_routing_number'));
         $payment->setEcheckAcctNumber($additionalData->getData('echeck_account_number'));
         $payment->setEcheckAcctType($additionalData->getData('echeck_acct_type'));
