@@ -418,16 +418,24 @@ define(
                 //showHidePaymentFields();
             },
             initIframe: function () {
+                var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null ? window.checkoutConfig.payment.bluepay_payment.customerName1 : quote.billingAddress().firstname;
+                var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null ? window.checkoutConfig.payment.bluepay_payment.customerName2 : quote.billingAddress().lastname;
+                var company = window.checkoutConfig.payment.bluepay_payment.customerCompany != null ? window.checkoutConfig.payment.bluepay_payment.customerCompany : quote.billingAddress().company;
+                var email = window.checkoutConfig.payment.bluepay_payment.customerEmail != null ? window.checkoutConfig.payment.bluepay_payment.customerEmail : quote.billingAddress().company;
+                var addr1 = window.checkoutConfig.payment.bluepay_payment.customerStreet != null ? window.checkoutConfig.payment.bluepay_payment.customerStreet : quote.billingAddress().street(0);
+                var city = window.checkoutConfig.payment.bluepay_payment.customerCity != null ? window.checkoutConfig.payment.bluepay_payment.customerCity : quote.billingAddress().city;
+                var state = window.checkoutConfig.payment.bluepay_payment.customerRegion != null ? window.checkoutConfig.payment.bluepay_payment.customerRegion : quote.billingAddress().region;
+                var zip = window.checkoutConfig.payment.bluepay_payment.customerZip != null ? window.checkoutConfig.payment.bluepay_payment.customerZip : quote.billingAddress().postcode;
                 iframeFields = "&AMOUNT=" + quote.getTotals()()['grand_total'] +
                     "&TRANSACTION_TYPE=" + window.checkoutConfig.payment.bluepay_payment.transType +
-                    "&NAME1=" + window.checkoutConfig.payment.bluepay_payment.customerName1 +
-                    "&NAME2=" + window.checkoutConfig.payment.bluepay_payment.customerName2 +
-                    "&COMPANY_NAME=" + window.checkoutConfig.payment.bluepay_payment.customerCompany +
-                    "&EMAIL=" + window.checkoutConfig.payment.bluepay_payment.customerEmail +
-                    "&ADDR1=" + window.checkoutConfig.payment.bluepay_payment.customerStreet +
-                    "&CITY=" + window.checkoutConfig.payment.bluepay_payment.customerCity +
-                    "&STATE=" + window.checkoutConfig.payment.bluepay_payment.customerRegion +
-                    "&ZIPCODE=" + window.checkoutConfig.payment.bluepay_payment.customerZip +
+                    "&NAME1=" + name1 +
+                    "&NAME2=" + name2 +
+                    "&COMPANY_NAME=" + company +
+                    "&EMAIL=" + email +
+                    "&ADDR1=" + addr1 +
+                    "&CITY=" + city +
+                    "&STATE=" + state +
+                    "&ZIPCODE=" + zip +
                     "&MERCHANT=" + window.checkoutConfig.payment.bluepay_payment.accountId + 
                     "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                     "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +

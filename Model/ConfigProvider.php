@@ -130,6 +130,10 @@ class ConfigProvider implements ConfigProviderInterface
             $email = $customerData->getEmail();
         }
 
+        $transType = $this->scopeConfiguration->getValue(
+            'payment/bluepay_payment/payment_action',
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        ) == "authorize" ? "AUTH" : "SALE";
         $hashstr = $this->scopeConfiguration->getValue(
             'payment/bluepay_payment/secret_key',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
@@ -138,22 +142,12 @@ class ConfigProvider implements ConfigProviderInterface
                 'payment/bluepay_payment/account_id',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
-            $company . 
-            $street . 
-            $city .
-            $state .
-            $zip .
+            $transType .
             $this->scopeConfiguration->getValue(
-            'payment/bluepay_payment/trans_mode',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
+                'payment/bluepay_payment/trans_mode',
+                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            );
         $tps = hash('sha512', $hashstr);
-        $transType = $this->scopeConfiguration->getValue(
-                        'payment/bluepay_payment/payment_action',
-                        \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-                    ) == "authorize" ? "AUTH" : "SALE";
-
-
         $i = 1;
         $level3 = [];
         foreach ($this->cart->getQuote()->getAllItems() as $item) {
@@ -178,7 +172,7 @@ class ConfigProvider implements ConfigProviderInterface
                         \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                     ),
                     'tps' => $tps,
-                    'tpsDef' => "MERCHANT COMPANY_NAME ADDR1 CITY STATE ZIPCODE MODE",
+                    'tpsDef' => "MERCHANT TRANSACTION_TYPE MODE",
                     'transType' => $transType,
                     'cctypes' => $this->scopeConfiguration->getValue(
                         'payment/bluepay_payment/cctypes',
