@@ -34,8 +34,7 @@ class Form extends \Magento\Framework\View\Element\Template
     private $customerSession;
     private $customerRegistry;
     private $addressRegistry;
-    private $storeManager;
-    private $scopeConfiguration;
+    private $ccConfig;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -43,8 +42,6 @@ class Form extends \Magento\Framework\View\Element\Template
         \Magento\Customer\Model\CustomerRegistry $customerRegistry,
         \Magento\Customer\Model\AddressRegistry $addressRegistry,
         \Magento\Framework\ObjectManagerInterface $objectManager,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfiguration,
         CcConfig $ccConfig,
         array $data = []
     ) {
@@ -53,9 +50,7 @@ class Form extends \Magento\Framework\View\Element\Template
     $this->customerRegistry = $customerRegistry;
     $this->addressRegistry = $addressRegistry;
     $this->objectManager = $objectManager;
-    $this->storeManager = $storeManager;
     $this->ccConfig = $ccConfig;
-    $this->scopeConfiguration = $scopeConfiguration;
     }
 
     public function _prepareLayout()
@@ -103,12 +98,12 @@ class Form extends \Magento\Framework\View\Element\Template
 
     public function getStoreUrl()
     {
-        return $this->storeManager->getStore()->getBaseUrl();
+        return $this->_storeManager->getStore()->getBaseUrl();
     }
 
     public function getConfigData($value)
     {
-        return $this->scopeConfiguration->getValue('payment/bluepay_payment/' . $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        return $this->_scopeConfig->getValue('payment/bluepay_payment/' . $value, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
     }
 
     public function getTpsDef()
@@ -120,18 +115,18 @@ class Form extends \Magento\Framework\View\Element\Template
     {
         $customer = $this->customerRegistry->retrieve($this->customerSession->getCustomerId());
         $customerData = $customer->getDataModel();
-        $hashstr = $this->scopeConfiguration->getValue(
+        $hashstr = $this->_scopeConfig->getValue(
             'payment/bluepay_payment/secret_key',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
-            $this->scopeConfiguration->getValue(
+            $this->_scopeConfig->getValue(
                 'payment/bluepay_payment/account_id',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
             $this->getCustomerData()->getFirstName() .
             $this->getCustomerData()->getLastName() .
             $this->getCustomerData()->getCompany() .
-            $this->scopeConfiguration->getValue(
+            $this->_scopeConfig->getValue(
             'payment/bluepay_payment/trans_mode',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );

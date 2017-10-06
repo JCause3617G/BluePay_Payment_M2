@@ -129,11 +129,6 @@ class Payment extends \Magento\Payment\Model\Method\Cc
      */
     private $responseFactory;
 
-    /**
-    * @var EventManager
-    */
-    private $eventManager;
-
     protected $messageManager;
 
     public function __construct(
@@ -156,7 +151,6 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         \BluePay\Payment\Model\Request\Factory $requestFactory,
         \BluePay\Payment\Model\Response\Factory $responseFactory,
         \Magento\Framework\HTTP\ZendClientFactory $zendClientFactory,
-        \Magento\Framework\Event\ManagerInterface $eventManager,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -170,7 +164,6 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         $this->requestFactory = $requestFactory;
         $this->responseFactory = $responseFactory;
         $this->zendClientFactory = $zendClientFactory;
-        $this->eventManager = $eventManager;
         $this->messageManager = $messageManager;
 
         parent::__construct(
@@ -847,7 +840,7 @@ $payment->setCcType($result->getCardType());
 
     public function assignData(\Magento\Framework\DataObject $data)
     {
-        $this->eventManager->dispatch(
+        $this->_eventManager->dispatch(
             'payment_method_assign_data_' . $this->getCode(),
             [
                 Observer\DataAssignObserver::METHOD_CODE => $this,
@@ -874,7 +867,7 @@ $payment->setCcType($result->getCardType());
         $infoInstance->setAdditionalInformation('card_type', $infoInstance->getCardType());
         $infoInstance->setAdditionalInformation('iframe', $infoInstance->getIframe());
 
-        $this->eventManager->dispatch(
+        $this->_eventManager->dispatch(
             'payment_method_assign_data',
             [
                 Observer\DataAssignObserver::METHOD_CODE => $this,

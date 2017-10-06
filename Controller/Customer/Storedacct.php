@@ -21,8 +21,6 @@ class Storedacct extends \Magento\Framework\App\Action\Action
 
     private $response;
 
-    private $url;
-
     private $customerSession;
 
     private $customerRegistry;
@@ -34,7 +32,6 @@ class Storedacct extends \Magento\Framework\App\Action\Action
         \Magento\Customer\Model\CustomerRegistry $customerRegistry,
         \Magento\Framework\App\Request\Http $request,
         \Magento\Framework\App\Response\Http $response,
-        \Magento\Framework\UrlInterface $url,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         \Magento\Framework\HTTP\ZendClientFactory $zendClientFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfiguration
@@ -44,7 +41,6 @@ class Storedacct extends \Magento\Framework\App\Action\Action
         $this->customerRegistry = $customerRegistry;
         $this->request = $request;
         $this->response = $response;
-        $this->url = $url;
         $this->resultPageFactory = $resultPageFactory;
         $this->zendClientFactory = $zendClientFactory;
         $this->scopeConfiguration = $scopeConfiguration;
@@ -53,7 +49,7 @@ class Storedacct extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         if (!$this->customerSession->isLoggedIn()) {
-            $this->customerSession->setAfterAuthUrl($this->url->getCurrentUrl());
+            $this->customerSession->setAfterAuthUrl($this->_url->getCurrentUrl());
             $this->customerSession->authenticate();
         }
         $resultPage = $this->resultPageFactory->create();
