@@ -132,6 +132,7 @@ define(
                         var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : quote.billingAddress().firstname;
                         var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : quote.billingAddress().lastname;
                         var company = window.checkoutConfig.payment.bluepay_payment.customerCompany != null  && window.checkoutConfig.payment.bluepay_payment.customerCompany != '' ? window.checkoutConfig.payment.bluepay_payment.customerCompany : quote.billingAddress().company;
+                        company = company != undefined ? company : '';
                         var email = window.checkoutConfig.payment.bluepay_payment.customerEmail != null && window.checkoutConfig.payment.bluepay_payment.customerEmail != '' ? window.checkoutConfig.payment.bluepay_payment.customerEmail : quote.billingAddress().email;
                         email = email != '' && email != null ? email : quote.guestEmail;
                         var addr1 = window.checkoutConfig.payment.bluepay_payment.customerStreet != null && window.checkoutConfig.payment.bluepay_payment.customerStreet != '' ? window.checkoutConfig.payment.bluepay_payment.customerStreet : quote.billingAddress().street[0];
@@ -142,6 +143,7 @@ define(
                         var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : '';
                         var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : '';
                         var company = window.checkoutConfig.payment.bluepay_payment.customerCompany != null  && window.checkoutConfig.payment.bluepay_payment.customerCompany != '' ? window.checkoutConfig.payment.bluepay_payment.customerCompany : '';
+                        company = company != undefined ? company : '';
                         var email = window.checkoutConfig.payment.bluepay_payment.customerEmail != null && window.checkoutConfig.payment.bluepay_payment.customerEmail != '' ? window.checkoutConfig.payment.bluepay_payment.customerEmail : '';
                         var addr1 = window.checkoutConfig.payment.bluepay_payment.customerStreet != null && window.checkoutConfig.payment.bluepay_payment.customerStreet != '' ? window.checkoutConfig.payment.bluepay_payment.customerStreet : '';
                         var city = window.checkoutConfig.payment.bluepay_payment.customerCity != null && window.checkoutConfig.payment.bluepay_payment.customerCity != '' ? window.checkoutConfig.payment.bluepay_payment.customerCity : '';
@@ -441,6 +443,7 @@ define(
                     var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : quote.billingAddress().firstname;
                     var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : quote.billingAddress().lastname;
                     var company = window.checkoutConfig.payment.bluepay_payment.customerCompany != null  && window.checkoutConfig.payment.bluepay_payment.customerCompany != '' ? window.checkoutConfig.payment.bluepay_payment.customerCompany : quote.billingAddress().company;
+                    company = company != undefined ? company : '';
                     var email = window.checkoutConfig.payment.bluepay_payment.customerEmail != null && window.checkoutConfig.payment.bluepay_payment.customerEmail != '' ? window.checkoutConfig.payment.bluepay_payment.customerEmail : quote.billingAddress().email;
                     email = email != '' && email != null ? email : quote.guestEmail;
                     var addr1 = window.checkoutConfig.payment.bluepay_payment.customerStreet != null && window.checkoutConfig.payment.bluepay_payment.customerStreet != '' ? window.checkoutConfig.payment.bluepay_payment.customerStreet : quote.billingAddress().street[0];
@@ -451,6 +454,7 @@ define(
                     var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : '';
                     var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : '';
                     var company = window.checkoutConfig.payment.bluepay_payment.customerCompany != null  && window.checkoutConfig.payment.bluepay_payment.customerCompany != '' ? window.checkoutConfig.payment.bluepay_payment.customerCompany : '';
+                    company = company != undefined ? company : '';
                     var email = window.checkoutConfig.payment.bluepay_payment.customerEmail != null && window.checkoutConfig.payment.bluepay_payment.customerEmail != '' ? window.checkoutConfig.payment.bluepay_payment.customerEmail : '';
                     var addr1 = window.checkoutConfig.payment.bluepay_payment.customerStreet != null && window.checkoutConfig.payment.bluepay_payment.customerStreet != '' ? window.checkoutConfig.payment.bluepay_payment.customerStreet : '';
                     var city = window.checkoutConfig.payment.bluepay_payment.customerCity != null && window.checkoutConfig.payment.bluepay_payment.customerCity != '' ? window.checkoutConfig.payment.bluepay_payment.customerCity : '';
