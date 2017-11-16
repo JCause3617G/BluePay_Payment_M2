@@ -401,7 +401,7 @@ $payment->setCcType($result->getCardType());
      */
     public function _buildRequest(\Magento\Payment\Model\InfoInterface $payment)
     {
-        if ($payment->getIframe() == "1" || $payment->getAdditionalInformation('iframe') == "1")
+        if (($payment->getIframe() == "1" || $payment->getAdditionalInformation('iframe') == "1") && $payment->getTransactionType() != "CAPTURE")
             return $payment;
         $order = $payment->getOrder();
         $this->setStore($order->getStoreId());
@@ -513,7 +513,7 @@ $payment->setCcType($result->getCardType());
         $info = $this->getInfoInstance();
         $result = $this->responseFactory->create();
 
-        if ($info->getIframe() == "1") {
+        if ($info->getIframe() == "1" && $info->getTransactionType() != "CAPTURE") {
             $result->setResult($info->getResult());
             $result->setMessage($info->getMessage());
             $result->setRrno($info->getToken());
@@ -524,7 +524,7 @@ $payment->setCcType($result->getCardType());
             $result->setAvs($info->getAvs());
             $result->setCvv2($info->getCvv2());
             $this->assignBluePayToken($result->getRrno());
-        } else if ($info->getAdditionalInformation('iframe') == "1") {
+        } else if ($info->getAdditionalInformation('iframe') == "1" && $info->getTransactionType() != "CAPTURE") {
             $result->setResult($info->getAdditionalInformation('result'));
             $result->setMessage($info->getAdditionalInformation('message'));
             $result->setRrno($info->getAdditionalInformation('trans_id'));
