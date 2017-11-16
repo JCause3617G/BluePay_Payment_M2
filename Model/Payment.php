@@ -914,6 +914,8 @@ $payment->setCcType($result->getCardType());
             return;
         }
         $customerId = $this->checkoutSession->getQuote()->getCustomerId();
+        if (!$customerId)
+            return;
         $customer = $this->customerRegistry->retrieve($customerId);
         $customerData = $customer->getDataModel();
         $paymentAcctString = $customerData->getCustomAttribute('bluepay_stored_accts') ?
