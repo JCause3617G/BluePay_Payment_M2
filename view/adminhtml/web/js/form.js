@@ -57,7 +57,7 @@ window.addEventListener("message", receiveMessage, false);
                 jQuery("#bluepay_payment_trans_type").val(event.data["TRANS_TYPE"]);
                 jQuery("#bluepay_payment_result").val(event.data["Result"]);
                 jQuery("#bluepay_payment_message").val(event.data["MESSAGE"]);
-                jQuery("#bluepay_payment_token").val(event.data["RRNO"]);
+                jQuery("#bluepay_payment_token").val(event.data["TRANS_ID"]);
                 jQuery("#bluepay_payment_iframe").val("1");
                     /*disableElements('save');
                     jQuery('#edit_form').on('invalid-form.validate', function() {
