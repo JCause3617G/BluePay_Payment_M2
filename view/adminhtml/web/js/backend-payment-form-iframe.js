@@ -34,8 +34,8 @@
                         initIframe();
                         return;
                     }
-                    document.getElementById("bluepay_payment_payment_type").disabled = true;
-                    document.getElementById("bluepay_payment_stored_acct_cb").disabled = true;
+                    //document.getElementById("bluepay_payment_payment_type").disabled = true;
+                    //document.getElementById("bluepay_payment_stored_acct_cb").disabled = true;
                 });
             },
             getStoredAccounts: function () {

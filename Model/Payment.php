@@ -241,6 +241,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
     
     public function authorize(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
+        $order = $payment->getOrder();
         if ($amount <= 0) {
             throw new \Magento\Framework\Exception\LocalizedException(__('Invalid amount for authorization.'));
         }
@@ -256,8 +257,10 @@ class Payment extends \Magento\Payment\Model\Method\Cc
             ->setCcTransId($result->getRrno())
             ->setCcAvsStatus($result->getAvs())
             ->setCcCidStatus($result->getCvv2());
+        if ($payment->getCcTransId() == '')
+            $payment->setCcTransId($result->getToken());
         if ($payment->getCcType() == '') {
-$payment->setCcType($result->getCardType());
+            $payment->setCcType($result->getCardType());
         }
         if ($payment->getCcLast4() == '') {
             $payment->setCcLast4(substr($result->getCcNumber(), -4));
@@ -289,13 +292,13 @@ $payment->setCcType($result->getCardType());
      */
     public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
-    $payment->setAmount($amount);
+        $payment->setAmount($amount);
         if ($payment->getCcTransId()) {
             $payment->setTransactionType(self::REQUEST_TYPE_CAPTURE_ONLY);
         } else {
             $payment->setTransactionType(self::REQUEST_TYPE_AUTH_CAPTURE);
         }
-    $payment->setRrno($payment->getCcTransId());
+        $payment->setRrno($payment->getCcTransId());
         $request = $this->_buildRequest($payment);
         $result = $this->_postRequest($request);
         if ($result->getResult() == self::RESPONSE_CODE_APPROVED) {
@@ -312,7 +315,7 @@ $payment->setCcType($result->getCardType());
             }
             return $this;
         }
-    switch ($result->getResult()) {
+        switch ($result->getResult()) {
         case self::RESPONSE_CODE_DECLINED:
             throw new \Magento\Framework\Exception\LocalizedException(__('The transaction has been declined.'));
         case self::RESPONSE_CODE_ERROR:
@@ -401,7 +404,7 @@ $payment->setCcType($result->getCardType());
      */
     public function _buildRequest(\Magento\Payment\Model\InfoInterface $payment)
     {
-        if (($payment->getIframe() == "1" || $payment->getAdditionalInformation('iframe') == "1") && $payment->getTransactionType() != "CAPTURE")
+        if ($payment->getTransactionType() != "REFUND" && ($payment->getIframe() == "1" || $payment->getAdditionalInformation('iframe') == "1") && $payment->getTransactionType() != "CAPTURE")
             return $payment;
         $order = $payment->getOrder();
         $this->setStore($order->getStoreId());
@@ -421,7 +424,6 @@ $payment->setCcType($result->getCardType());
         $request->setRrno($payment->getToken());
         $payment->setRrno($payment->getToken());
     }
-
         $request->setMerchant($this->getConfigData('account_id'))
             ->setTransactionType($payment->getTransactionType())
             ->setPaymentType($payment->getPaymentType())
@@ -512,7 +514,6 @@ $payment->setCcType($result->getCardType());
     {
         $info = $this->getInfoInstance();
         $result = $this->responseFactory->create();
-
         if ($info->getIframe() == "1" && $info->getTransactionType() != "CAPTURE") {
             $result->setResult($info->getResult());
             $result->setMessage($info->getMessage());
@@ -524,7 +525,7 @@ $payment->setCcType($result->getCardType());
             $result->setAvs($info->getAvs());
             $result->setCvv2($info->getCvv2());
             $this->assignBluePayToken($result->getRrno());
-        } else if ($info->getAdditionalInformation('iframe') == "1" && $info->getTransactionType() != "CAPTURE") {
+        } else if ($info->getAdditionalInformation('iframe') == "1" && ($info->getTransactionType() != "CAPTURE" && $info->getTransactionType() != "REFUND")) {
             $result->setResult($info->getAdditionalInformation('result'));
             $result->setMessage($info->getAdditionalInformation('message'));
             $result->setRrno($info->getAdditionalInformation('trans_id'));
@@ -683,7 +684,7 @@ $payment->setCcType($result->getCardType());
      */
     public function _wrapGatewayError($text)
     {
-        return __('Gateway error: %s', $text);
+        return __('Gateway error: ' . $text);
     }
     
     final public function calcTPS(\Magento\Payment\Model\InfoInterface $payment)

@@ -31,10 +31,10 @@ use Magento\Payment\Model\CcConfig;
 
 class Form extends \Magento\Framework\View\Element\Template
 {
-    private $customerSession;
-    private $customerRegistry;
-    private $addressRegistry;
-    private $ccConfig;
+    protected $customerSession;
+    protected $customerRegistry;
+    protected $addressRegistry;
+    protected $ccConfig;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -113,6 +113,8 @@ class Form extends \Magento\Framework\View\Element\Template
 
     public function getTps()
     {
+        if (!$this->customerSession->getCustomerId())
+            return;
         $customer = $this->customerRegistry->retrieve($this->customerSession->getCustomerId());
         $customerData = $customer->getDataModel();
         $hashstr = $this->_scopeConfig->getValue(
@@ -135,20 +137,30 @@ class Form extends \Magento\Framework\View\Element\Template
 
     public function getCustomerName()
     {
+        if (!$this->customerSession->getCustomerId())
+            return;
         $customer = $this->customerRegistry->retrieve($this->customerSession->getCustomerId());
         return $customer->getDataModel();
     }
 
     public function getCustomerData()
     {
+        if (!$this->customerSession->getCustomerId())
+            return;
         $customer = $this->customerRegistry->retrieve($this->customerSession->getCustomerId());
         $customerData = $customer->getDataModel();
-        $address = $this->addressRegistry->retrieve($this->customerSession->getCustomer()->getDefaultBilling());
-        return $address->getDataModel();
+        if ($this->customerSession->getCustomer()->getDefaultBilling())
+            return $this->addressRegistry->retrieve($this->customerSession->getCustomer()->getDefaultBilling())->getDataModel();
+        else if ($this->customerSession->getCustomer()->getDefaultShipping())
+            return $this->addressRegistry->retrieve($this->customerSession->getCustomer()->getDefaultShipping())->getDataModel();
+        else
+            return null;
     }
 
     public function getStoredPaymentAccts()
     {
+        if (!$this->customerSession->getCustomerId())
+            return;
         $customer = $this->customerRegistry->retrieve($this->customerSession->getCustomerId());
         $customerData = $customer->getDataModel();
         $paymentAcctString = $customerData->getCustomAttribute('bluepay_stored_accts') ?

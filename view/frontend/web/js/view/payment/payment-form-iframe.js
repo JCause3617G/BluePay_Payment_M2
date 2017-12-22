@@ -107,14 +107,13 @@ define(
                     this.avs = event.data["AVS"];
                     this.cvv2 = event.data["CVV2"];
                     this.token = event.data["RRNO"];
-
-                    if (event.data["PAYMENT_TYPE"] == "CREDIT") {
+                    if (event.data["PAYMENT_TYPE"] == "CREDIT" || event.data["PAYMENT_TYPE"] == "CC") {
                         this.creditCardNumber = event.data["PAYMENT_ACCOUNT"];
                         this.expirationMonth = event.data["CC_EXPIRES_MONTH"];
                         this.expirationYear = event.data["CC_EXPIRES_YEAR"];     
                         jQuery("#maskedCC").val(this.creditCardNumber);
                         jQuery("#ccExpMonth").val(event.data["CC_EXPIRES_MONTH"]);
-                        jQuery("#ccExpYear").val(event.data["CC_EXPIRES_YEAR"]);                  
+                        jQuery("#ccExpYear").val(event.data["CC_EXPIRES_YEAR"]);                 
                     } else if (event.data["PAYMENT_TYPE"] == "ACH") {
                         this.echeckAccountType = event.data["ACH_ACCOUNT_TYPE"];
                         this.echeckRoutingNumber = event.data["ACH_ROUTING"];
@@ -128,6 +127,8 @@ define(
             }
 
                 function initIframe() {
+                    var paymentType = jQuery("#bluepay_payment_payment_type").val();
+                    var transType = jQuery("#bluepay_payment_payment_type").val() == 'ACH' ? 'SALE' : window.checkoutConfig.payment.bluepay_payment.transType;
                     if (quote.billingAddress()) {
                         var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : quote.billingAddress().firstname;
                         var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : quote.billingAddress().lastname;
@@ -151,7 +152,8 @@ define(
                         var zip = window.checkoutConfig.payment.bluepay_payment.customerZip != null && window.checkoutConfig.payment.bluepay_payment.customerZip != '' ? window.checkoutConfig.payment.bluepay_payment.customerZip : '';
                     }
                     iframeFields = "&AMOUNT=" + quote.getTotals()()['grand_total'] +
-                        "&TRANSACTION_TYPE=" + window.checkoutConfig.payment.bluepay_payment.transType +
+                        "&TRANSACTION_TYPE=" + transType +
+                        "&PAYMENT_TYPE=" + paymentType +
                         "&NAME1=" + name1 +
                         "&NAME2=" + name2 +
                         "&COMPANY_NAME=" + company +
@@ -439,6 +441,8 @@ define(
                 //showHidePaymentFields();
             },
             initIframe: function () {
+                var paymentType = jQuery("#bluepay_payment_payment_type").val();
+                var transType = jQuery("#bluepay_payment_payment_type").val() == 'ACH' ? 'SALE' : window.checkoutConfig.payment.bluepay_payment.transType;
                 if (quote.billingAddress()) {
                     var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : quote.billingAddress().firstname;
                     var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : quote.billingAddress().lastname;
@@ -461,8 +465,14 @@ define(
                     var state = window.checkoutConfig.payment.bluepay_payment.customerRegion != null && window.checkoutConfig.payment.bluepay_payment.customerRegion != '' ? window.checkoutConfig.payment.bluepay_payment.customerRegion : '';
                     var zip = window.checkoutConfig.payment.bluepay_payment.customerZip != null && window.checkoutConfig.payment.bluepay_payment.customerZip != '' ? window.checkoutConfig.payment.bluepay_payment.customerZip : '';
                 }
+                if (!window.checkoutConfig.payment.bluepay_payment.isCustomerLoggedIn ||
+                    window.checkoutConfig.payment.bluepay_payment.allowAccountsStorage == '0') {
+                    jQuery("#bluepay_payment_stored_acct_div").hide();
+                    jQuery("#bluepay_payment_stored_acct_cb_div").hide();
+                }
                 iframeFields = "&AMOUNT=" + quote.getTotals()()['grand_total'] +
-                    "&TRANSACTION_TYPE=" + window.checkoutConfig.payment.bluepay_payment.transType +
+                    "&TRANSACTION_TYPE=" + transType +
+                    "&PAYMENT_TYPE=" + paymentType +
                     "&NAME1=" + name1 +
                     "&NAME2=" + name2 +
                     "&COMPANY_NAME=" + company +

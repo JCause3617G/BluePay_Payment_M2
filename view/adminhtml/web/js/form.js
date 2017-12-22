@@ -4,32 +4,190 @@
  */
 define([
     'jquery',
-    //'Magento_Sales/order/create/scripts'
-    'BluePay_Payment/js/scripts'
-], function (jQuery) {
+    //'Magento_Sales/order/create/scripts',
+    'BluePay_Payment/js/scripts',
+    'Magento_Ui/js/modal/alert'
+], function (jQuery, confirm, alert) {
     'use strict';
-    var $el = jQuery('#edit_form'),
+    /*var $el = jQuery('#edit_form'),
         config,
         baseUrl,
         order,
         payment;
     if (!$el.length || !$el.data('order-config')) {
         return;
+    }*/
+
+window.addEventListener("message", receiveMessage, false);
+            function receiveMessage(event)
+            {
+                var message = "'" + event.data + "'";
+                if (message.match("Please enter")) {
+                    jQuery('#edit_form').trigger('processStop');
+                    jQuery('#edit_form').off('invalid-form.validate');
+                    console.log(event.data);
+                    alert({content: event.data});
+                    return;
+                }
+                jQuery('#bluepay_payment_payment_type').attr('disabled', false);
+                jQuery('#bluepay_payment_stored_acct').attr('disabled', false);
+                jQuery('#bluepay_payment_cc_number').attr('disabled', false);
+                jQuery('#bluepay_payment_cc_type').attr('disabled', false);
+                jQuery('#bluepay_payment_cc_expire').attr('disabled', false);
+                jQuery('#bluepay_payment_token').attr('disabled', false);
+                jQuery('#bluepay_payment_ach_account_type').attr('disabled', false);
+                jQuery('#bluepay_payment_ach_account').attr('disabled', false);
+                jQuery('#bluepay_payment_ach_routing').attr('disabled', false);
+                jQuery('#bluepay_payment_iframe').attr('disabled', false);
+                jQuery('#bluepay_payment_result').attr('disabled', false);
+                jQuery('#bluepay_payment_message').attr('disabled', false);
+                jQuery('#bluepay_payment_trans_type').attr('disabled', false);
+                if (event.data["PAYMENT_TYPE"] == "CREDIT" || event.data["PAYMENT_TYPE"] == "CC") {
+                    jQuery("#bluepay_payment_cc_number").val(event.data["PAYMENT_ACCOUNT"]);
+                    jQuery("#bluepay_payment_cc_expire").val(event.data["CARD_EXPIRE"]);
+                    jQuery("#bluepay_payment_cc_type").val(event.data["CARD_TYPE"]);
+                    //creditCardData.expirationMonth = event.data["CARD_EXPIRE"].substring(0, 2);
+                    //creditCardData.expirationYear = event.data["CARD_EXPIRE"].substring(2, 4);
+                } else if (event.data["PAYMENT_TYPE"] == "ACH") {
+                    jQuery("#bluepay_payment_ach_account_type").val(event.data["ACH_ACCOUNT_TYPE"]);
+                    //jQuery("#bluepay_payment_ach_account").val(event.data["CARD_EXPIRE"]);
+                    jQuery("#bluepay_payment_ach_routing").val(event.data["ACH_ROUTING"]);
+                    jQuery("#bluepay_payment_cc_type").val('OT');
+                }
+                jQuery("#bluepay_payment_trans_type").val(event.data["TRANS_TYPE"]);
+                jQuery("#bluepay_payment_result").val(event.data["Result"]);
+                jQuery("#bluepay_payment_message").val(event.data["MESSAGE"]);
+                jQuery("#bluepay_payment_token").val(event.data["RRNO"]);
+                jQuery("#bluepay_payment_iframe").val("1");
+                    /*disableElements('save');
+                    jQuery('#edit_form').on('invalid-form.validate', function() {
+                        enableElements('save');
+                        jQuery('#edit_form').trigger('processStop');
+                        jQuery('#edit_form').off('invalid-form.validate');
+                    });
+                    jQuery('#edit_form').triggerHandler('save');*/
+                jQuery('#edit_form').trigger('submitOrder');
+            }
+
+    window.order.submit = function() {
+        jQuery('#edit_form').trigger('processStart');
+            if (this.paymentMethod == 'bluepay_payment') {
+                if (jQuery('#order-billing_address_firstname').val() == '' || jQuery('#order-billing_address_lastname').val() == '' || jQuery('#order-billing_address_street0').val() == ''
+                    || jQuery('#order-billing_address_city').val() == '' || jQuery('#order-billing_address_country_id').val() == '' || jQuery('#order-billing_address_region_id').val() == ''
+                    || jQuery('#order-billing_address_postcode').val() == '' || jQuery('#order-billing_address_postcode').val() == '') {  
+                    alert({
+                        content: 'Please fill out all billing address required fields'
+                        });
+                    jQuery('#edit_form').trigger('processStop');
+                    jQuery('#edit_form').off('invalid-form.validate');            
+                    return;
+                    }
+                if (jQuery('#order-shipping_address_firstname').val() == '' || jQuery('#order-shipping_address_lastname').val() == '' || jQuery('#order-shipping_address_street0').val() == ''
+                    || jQuery('#order-shipping_address_city').val() == '' || jQuery('#order-shipping_address_country_id').val() == '' || jQuery('#order-shipping_address_region_id').val() == ''
+                    || jQuery('#order-shipping_address_postcode').val() == '' || jQuery('#order-shipping_address_postcode').val() == '') {  
+                    alert({
+                        content: 'Please fill out all shipping address required fields'
+                        });
+                    jQuery('#edit_form').trigger('processStop');
+                    jQuery('#edit_form').off('invalid-form.validate');            
+                    return;
+                    }
+                /*jQuery('#order-shipping_method').find("span").each(function( index ) {
+                    console.log(jQuery(this).outerText);
+                    if (jQuery(this).outerText = "Get shippping method and rates")
+                        order.shippingMethod = '';
+                });
+                jQuery('#order-shipping_method input[type=radio]').each(function(){
+                    console.log($(this));
+                });*/
+                //!!! If no #order-shipping-method-info!!!!!
+                if (!jQuery('#order-shipping-method-info').is(":visible")) {
+                    alert({
+                        content: 'Please choose a shipping method'
+                    });
+                    jQuery('#edit_form').trigger('processStop');
+                    jQuery('#edit_form').off('invalid-form.validate');            
+                    return;
+                }          
+                var win = document.getElementById("iframe").contentWindow;
+                win.postMessage("Submit", "*");
+                return;
+            }
+            jQuery('#edit_form').trigger('submitOrder');
     }
 
-    config = $el.data('order-config');
-    baseUrl = $el.data('load-base-url');
+    window.order.setShippingMethod = function(method){
+            var data = {};
+            data['order[shipping_method]'] = method;
+            this.loadArea(['shipping_method', 'totals', 'billing_method'], true, data);
+            order.shippingMethod = method;
+            this.setPaymentMethod("bluepay_payment");
+    }
 
+    window.order.setPaymentMethod = function(method){
+            if (this.paymentMethod && $('payment_form_'+this.paymentMethod)) {
+                var form = 'payment_form_'+this.paymentMethod;
+                [form + '_before', form, form + '_after'].each(function(el) {
+                    var block = $(el);
+                    if (block) {
+                        block.hide();
+                        block.select('input', 'select', 'textarea').each(function(field) {
+                            field.disabled = true;
+                        });
+                    }
+                });
+            }
+            if(!this.paymentMethod || method){
+                $('order-billing_method_form').select('input', 'select', 'textarea').each(function(elem){
+                    if(elem.type != 'radio') elem.disabled = true;
+                })
+            }
+
+            if ($('payment_form_'+method)){                         
+                jQuery('#' + this.getAreaId('billing_method')).trigger('contentUpdated');
+                this.paymentMethod = method;
+                var form = 'payment_form_'+method;
+                [form + '_before', form, form + '_after'].each(function(el) {
+                    var block = $(el);
+                    if (block) {
+                        block.show();
+                        block.select('input', 'select', 'textarea').each(function(field) {
+                            field.disabled = false;
+                            if (!el.include('_before') && !el.include('_after') && !field.bindChange) {
+                                field.bindChange = true;
+                                field.paymentContainer = form;
+                                field.method = method;
+                                field.observe('change', this.changePaymentData.bind(this))
+                            }
+                        },this);
+                    }
+                },this);
+            }
+            if (method == "bluepay_payment") {
+                jQuery("#iframe").show();
+                jQuery("#bluepay_payment_payment_type").attr('disabled', false);
+                jQuery("#bluepay_payment_stored_acct").attr('disabled', false);
+                jQuery("#bluepay_payment_payment_type_div").show();
+                jQuery("#bluepay_payment_stored_acct_div").show();
+            } else {
+                jQuery("#iframe").hide();
+                jQuery("#bluepay_payment_payment_type").attr('disabled', true);
+                jQuery("#bluepay_payment_stored_acct").attr('disabled', true);
+                jQuery("#bluepay_payment_payment_type_div").hide();
+                jQuery("#bluepay_payment_stored_acct_div").hide();
+            }
+        }
+    order.setPaymentMethod('bluepay_payment');
+    /*config = $el.data('order-config');
+    baseUrl = $el.data('load-base-url');
     order = new AdminOrderBluePay(config);
     order.setLoadBaseUrl(baseUrl);
-
     order.setPaymentMethod('bluepay_payment');
+    //order.addExcludedPaymentMethod('bluepay_payment');
     payment = {
         switchMethod: order.switchPaymentMethod.bind(order)
     };
-
-
     window.order = order;
-    window.payment = payment;
+    window.payment = payment;*/
 
 });

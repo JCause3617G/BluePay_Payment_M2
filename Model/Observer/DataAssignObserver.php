@@ -55,7 +55,6 @@ class DataAssignObserver extends AbstractDataAssignObserver
         //$payment->setCcType($additionalData->getData('card_type'));
         $payment->setCcExpMonth($additionalData->getData('cc_exp_month'));
         $payment->setCcExpYear($additionalData->getData('cc_exp_year'));
-
         $payment->setPaymentType($additionalData->getData('payment_type'));
         $payment->setIframe($additionalData->getData('iframe'));
         $payment->setCcNumber($additionalData->getData('cc_number'));
@@ -66,12 +65,13 @@ class DataAssignObserver extends AbstractDataAssignObserver
         $payment->setToken($additionalData->getData('token'));
         $payment->setTransID($additionalData->getData('trans_id'));
         $payment->setSavePaymentInfo($additionalData->getData('save_payment_info'));
+        $payment->setTransactionType($additionalData->getData('trans_type'));
         $paymentType = $additionalData->getData('card_type') == "ACH" ? "OT" : $additionalData->getData('card_type');
         $payment->setCardType($paymentType);
-
         if ($additionalData->getData('iframe') == "1") {
             $payment->setResult($additionalData->getData('result'));
             $payment->setMessage($additionalData->getData('message'));
+            $payment->setRrno($additionalData->getData('token'));
             //$payment->setAuthCode($object->getAuthCode());
             //$payment->setAvs($object->getAvs());
             //$payment->setCvv2($object->getCvv2());

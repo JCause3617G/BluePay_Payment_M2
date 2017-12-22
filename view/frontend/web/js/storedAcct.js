@@ -11,7 +11,6 @@ require([
         'jquery/ui',
     ], function(confirm, alert){
         'use strict';
-
         jQuery(document).ready(function() {
         var iframePaymentFields = '';
         jQuery("#deleteBtn").hide();

@@ -10,7 +10,7 @@ class Form extends \Magento\Payment\Block\Form\Cc
     /**
      * @var string
      */
-    protected $_template = 'BluePay_Payment::form/cc.phtml';
+    protected $_template = 'BluePay_Payment::payment-iframe.phtml';
 
     /**
      * Payment config model
@@ -43,6 +43,8 @@ class Form extends \Magento\Payment\Block\Form\Cc
 
     public function getStoredPaymentAccts()
     {
+        if (!$this->_backend->getQuote()->getCustomerId())
+            return;
         $customer = $this->_customerRegistry->retrieve($this->_backend->getQuote()->getCustomerId());
         $customerData = $customer->getDataModel();
         $paymentAcctString = $customerData->getCustomAttribute('bluepay_stored_accts') ?
@@ -67,6 +69,11 @@ class Form extends \Magento\Payment\Block\Form\Cc
         return $this->_backend->getQuote()->getGrandTotal();
     }
 
+    public function getShippingMethod()
+    {
+        return $this->_backend->getQuote()->getShippingAddress()->getShippingMethod();
+    }
+
     public function getTpsDef()
     {
         return "MERCHANT COMPANY_NAME ADDR1 CITY ZIPCODE MODE";
@@ -74,28 +81,37 @@ class Form extends \Magento\Payment\Block\Form\Cc
 
     public function getCustomerEmail()
     {
+        if (!$this->_backend->getQuote()->getCustomerId())
+            return;
         $customer = $this->_customerRegistry->retrieve($this->_backend->getQuote()->getCustomerId());
         return $customer->getEmail();
     }
 
     public function getTps()
     {
+        error_log($this->_backend->getQuote()->getCustomerId());
+        if (!$this->_backend->getQuote()->getCustomerId())
+            return;
         $customer = $this->_customerRegistry->retrieve($this->_backend->getQuote()->getCustomerId());
         $customerData = $customer->getDataModel();
-        $hashstr = $this->_scopeConfiguration->getValue(
+        $company = $this->_backend->getQuote()->getBillingAddress()->getCompany();
+        $addr1 = $this->_backend->getQuote()->getBillingAddress()->getStreet()[0];
+        $city = $this->_backend->getQuote()->getBillingAddress()->getCity();
+        $zip = $this->_backend->getQuote()->getBillingAddress()->getPostCode();
+        $hashstr = $this->_scopeConfig->getValue(
             'payment/bluepay_payment/secret_key',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
-            $this->_scopeConfiguration->getValue(
+            $this->_scopeConfig->getValue(
                 'payment/bluepay_payment/account_id',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
-            $customerData->getAddresses()[0]->getCompany() . 
-            $customerData->getAddresses()[0]->getStreet()[0] . 
-            $customerData->getAddresses()[0]->getCity() .
+            $company . 
+            $addr1 . 
+            $city .
             //$customerData->getAddresses()[0]->getRegion()->getRegionId() .
-            $customerData->getAddresses()[0]->getPostCode() .
-            $this->_scopeConfiguration->getValue(
+            $zip .
+            $this->_scopeConfig->getValue(
             'payment/bluepay_payment/trans_mode',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );

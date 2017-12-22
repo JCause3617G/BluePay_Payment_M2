@@ -142,7 +142,7 @@ class ConfigProvider implements ConfigProviderInterface
                 'payment/bluepay_payment/account_id',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
-            $transType .
+            //$transType .
             $this->scopeConfiguration->getValue(
                 'payment/bluepay_payment/trans_mode',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
@@ -172,7 +172,7 @@ class ConfigProvider implements ConfigProviderInterface
                         \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                     ),
                     'tps' => $tps,
-                    'tpsDef' => "MERCHANT TRANSACTION_TYPE MODE",
+                    'tpsDef' => "MERCHANT MODE",
                     'transType' => $transType,
                     'cctypes' => $this->scopeConfiguration->getValue(
                         'payment/bluepay_payment/cctypes',
