@@ -976,4 +976,9 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         $customer->updateData($customerData);
         $customer->save();
     }
+
+    public function validateCcNum($ccNumber)
+    {
+        return true;
+    }
 }
