@@ -89,7 +89,6 @@ class Form extends \Magento\Payment\Block\Form\Cc
 
     public function getTps()
     {
-        error_log($this->_backend->getQuote()->getCustomerId());
         if (!$this->_backend->getQuote()->getCustomerId())
             return;
         $customer = $this->_customerRegistry->retrieve($this->_backend->getQuote()->getCustomerId());

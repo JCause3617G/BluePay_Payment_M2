@@ -4,19 +4,13 @@
  */
 define([
     'jquery',
+    'jquery/ui',
+    'Magento_Ui/js/modal/confirm',
+    'Magento_Ui/js/modal/alert',
     //'Magento_Sales/order/create/scripts',
     'BluePay_Payment/js/scripts',
     'Magento_Ui/js/modal/alert'
 ], function (jQuery, confirm, alert) {
-    'use strict';
-    /*var $el = jQuery('#edit_form'),
-        config,
-        baseUrl,
-        order,
-        payment;
-    if (!$el.length || !$el.data('order-config')) {
-        return;
-    }*/
 
 window.addEventListener("message", receiveMessage, false);
             function receiveMessage(event)
@@ -59,13 +53,6 @@ window.addEventListener("message", receiveMessage, false);
                 jQuery("#bluepay_payment_message").val(event.data["MESSAGE"]);
                 jQuery("#bluepay_payment_token").val(event.data["TRANS_ID"]);
                 jQuery("#bluepay_payment_iframe").val("1");
-                    /*disableElements('save');
-                    jQuery('#edit_form').on('invalid-form.validate', function() {
-                        enableElements('save');
-                        jQuery('#edit_form').trigger('processStop');
-                        jQuery('#edit_form').off('invalid-form.validate');
-                    });
-                    jQuery('#edit_form').triggerHandler('save');*/
                 jQuery('#edit_form').trigger('submitOrder');
             }
 
@@ -92,15 +79,6 @@ window.addEventListener("message", receiveMessage, false);
                     jQuery('#edit_form').off('invalid-form.validate');            
                     return;
                     }
-                /*jQuery('#order-shipping_method').find("span").each(function( index ) {
-                    console.log(jQuery(this).outerText);
-                    if (jQuery(this).outerText = "Get shippping method and rates")
-                        order.shippingMethod = '';
-                });
-                jQuery('#order-shipping_method input[type=radio]').each(function(){
-                    console.log($(this));
-                });*/
-                //!!! If no #order-shipping-method-info!!!!!
                 if (!jQuery('#order-shipping-method-info').is(":visible")) {
                     alert({
                         content: 'Please choose a shipping method'
@@ -178,16 +156,5 @@ window.addEventListener("message", receiveMessage, false);
             }
         }
     order.setPaymentMethod('bluepay_payment');
-    /*config = $el.data('order-config');
-    baseUrl = $el.data('load-base-url');
-    order = new AdminOrderBluePay(config);
-    order.setLoadBaseUrl(baseUrl);
-    order.setPaymentMethod('bluepay_payment');
-    //order.addExcludedPaymentMethod('bluepay_payment');
-    payment = {
-        switchMethod: order.switchPaymentMethod.bind(order)
-    };
-    window.order = order;
-    window.payment = payment;*/
 
 });

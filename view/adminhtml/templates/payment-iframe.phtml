@@ -54,25 +54,7 @@ $shippingMethod = $block->getShippingMethod();
             jQuery('#bluepay_payment_result').attr('disabled', false);
             jQuery('#bluepay_payment_message').attr('disabled', false);
             jQuery('#bluepay_payment_trans_type').attr('disabled', false);
-            //window.order = window.bluepayOrder;
             var iframePaymentFields = '';
-        //jQuery( "#edit_form" ).unbind("submitOrder");
-        //jQuery( "#edit_form" ).unbind("click");
-        //jQuery('#edit_form').on('submitOrder', function(){
-        //    jQuery(window.bluepayOrder).trigger('realOrder');
-        //}).on('realOrder', window.bluepayOrder._realSubmit.bind(window.bluepayOrder));
-                //alert("SDFSDSF");
-                //enableElements('save');
-                //jQuery('#edit_form').trigger('processStop');
-                //jQuery('#edit_form').off('invalid-form.validate');
-                //return false;
-                //jQuery('body').trigger('processStart');
-                //setLoaderPosition();
-                // Temporary solutions will be removed after refactoring Authorize.Net (sales) functionality
-                //disableElements('save');
-                // Temporary solutions will be removed after refactoring Authorize.Net (sales) functionality
-                //window.order._realSubmit();
-
         function initIframe() {
             jQuery('#bluepay_payment_shipping_method').attr('disabled', false);
             jQuery('#bluepay_payment_payment_type').attr('disabled', false);
@@ -232,8 +214,7 @@ $shippingMethod = $block->getShippingMethod();
                                         class="admin__control-select"
                                         style="width: 260px"
                                         id="bluepay_payment_payment_type"
-                                        data-bind="attr: { id: 'bluepay_payment_payment_type'}, 
-                                        value: paymentType">
+                                        data-bind="attr: { id: 'bluepay_payment_payment_type'}">
                                         <option selected value="CC">Credit Card</option>
                                         <option value="ACH">eCheck</option>
                                 </select>
@@ -257,11 +238,9 @@ $shippingMethod = $block->getShippingMethod();
                                         class="admin__control-select"
                                         id="bluepay_payment_stored_acct"
                                         data-bind="attr: { id: 'bluepay_payment_stored_acct'},
-                                        options: getStoredAccountsValue(),
                                         optionsValue: 'value',
                                         optionsText: 'label',
-                                        optionsCaption: $t('--Use a new stored payment--'),
-                                        value: storedPaymentAccounts
+                                        optionsCaption: $t('--Use a new stored payment--')
                                         ">
                                 </select>
                             </div>
