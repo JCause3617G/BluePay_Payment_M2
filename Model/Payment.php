@@ -311,7 +311,8 @@ class Payment extends \Magento\Payment\Model\Method\Cc
             }
             $payment->setLastTransId($result->getRrno());
             if (!$payment->getParentTransactionId() || $result->getRrno() != $payment->getParentTransactionId()) {
-                $payment->setTransactionId($result->getRrno());
+                $transId = $result->getRrno() != '' ? $result->getRrno() : $result->getToken();
+                $payment->setTransactionId($transId);
             }
             return $this;
         }
