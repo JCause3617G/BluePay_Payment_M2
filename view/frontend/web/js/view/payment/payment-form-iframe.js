@@ -124,6 +124,7 @@ define(
                 }
                 self.placeOrder();
                 jQuery('#submitBtn').attr('disabled',false);
+                jQuery("#bluepay_payment_stored_acct").prop('selectedIndex',0);
             }
 
                 function initIframe() {
@@ -165,6 +166,7 @@ define(
                         "&MERCHANT=" + window.checkoutConfig.payment.bluepay_payment.accountId + 
                         "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                         "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
+                        "&MODE=" + window.checkoutConfig.payment.bluepay_payment.transMode +
                         "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
                         $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
                             iframeFields += '&' + key + '=' + encodeURIComponent(value);
@@ -247,7 +249,11 @@ define(
                             "&MERCHANT=" + window.checkoutConfig.payment.bluepay_payment.accountId + 
                             "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                             "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
+                            "&MODE=" + window.checkoutConfig.payment.bluepay_payment.transMode +
                             "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
+                            $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
+                                iframeFields += '&' + key + '=' + encodeURIComponent(value);
+                            });
                             $("#iframe").attr('src', window.checkoutConfig.payment.bluepay_payment.iframeUrl + iframeFields + iframePaymentFields);
                     });
                 });
@@ -484,6 +490,7 @@ define(
                     "&MERCHANT=" + window.checkoutConfig.payment.bluepay_payment.accountId + 
                     "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                     "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
+                    "&MODE=" + window.checkoutConfig.payment.bluepay_payment.transMode +
                     "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
                     $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
                         iframeFields += '&' + key + '=' + encodeURIComponent(value);
