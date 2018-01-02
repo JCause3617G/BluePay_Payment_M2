@@ -87,7 +87,7 @@ window.addEventListener("message", receiveMessage, false);
                     jQuery('#edit_form').off('invalid-form.validate');            
                     return;
                 }          
-                var win = document.getElementById("iframe").contentWindow;
+                var win = document.getElementById("bluepay_iframe").contentWindow;
                 win.postMessage("Submit", "*");
                 return;
             }
@@ -142,13 +142,13 @@ window.addEventListener("message", receiveMessage, false);
                 },this);
             }
             if (method == "bluepay_payment") {
-                jQuery("#iframe").show();
+                jQuery("#bluepay_iframe").show();
                 jQuery("#bluepay_payment_payment_type").attr('disabled', false);
                 jQuery("#bluepay_payment_stored_acct").attr('disabled', false);
                 jQuery("#bluepay_payment_payment_type_div").show();
                 jQuery("#bluepay_payment_stored_acct_div").show();
             } else {
-                jQuery("#iframe").hide();
+                jQuery("#bluepay_iframe").hide();
                 jQuery("#bluepay_payment_payment_type").attr('disabled', true);
                 jQuery("#bluepay_payment_stored_acct").attr('disabled', true);
                 jQuery("#bluepay_payment_payment_type_div").hide();

@@ -88,9 +88,9 @@ $shippingMethod = $block->getShippingMethod();
                     "&TPS_DEF=" + window.tpsDef +
                     "&USE_CVV2=" + window.useCvv2 +
                     "&MODE=" + window.transMode;
-                jQuery("#iframe").attr('src', window.iframeUrl + iframeFields + iframePaymentFields);
-                jQuery("#iframe").height(230);
-                jQuery("#iframe").width(600);
+                jQuery("#bluepay_iframe").attr('src', window.iframeUrl + iframeFields + iframePaymentFields);
+                jQuery("#bluepay_iframe").height(230);
+                jQuery("#bluepay_iframe").width(600);
         }
 
         function getStoredAccountsValue() {
@@ -249,4 +249,4 @@ $shippingMethod = $block->getShippingMethod();
                 </div>
     <br />        
     </div>
-<iframe id="iframe" frameBorder="0"></iframe>
+<iframe id="bluepay_iframe" frameBorder="0"></iframe>
