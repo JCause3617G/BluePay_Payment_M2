@@ -152,7 +152,7 @@ define(
                         var state = window.checkoutConfig.payment.bluepay_payment.customerRegion != null && window.checkoutConfig.payment.bluepay_payment.customerRegion != '' ? window.checkoutConfig.payment.bluepay_payment.customerRegion : '';
                         var zip = window.checkoutConfig.payment.bluepay_payment.customerZip != null && window.checkoutConfig.payment.bluepay_payment.customerZip != '' ? window.checkoutConfig.payment.bluepay_payment.customerZip : '';
                     }
-                    iframeFields = "&AMOUNT=" + quote.getTotals()()['grand_total'] +
+                    iframeFields = "&AMOUNT=" + quote.getTotals()()['base_grand_total'] +
                         "&TRANSACTION_TYPE=" + transType +
                         "&PAYMENT_TYPE=" + paymentType +
                         "&NAME1=" + name1 +
@@ -235,7 +235,7 @@ define(
                                 this.expirationYear = '';
                             }
                         }
-                        iframeFields = "&AMOUNT=" + quote.getTotals()()['grand_total'] +
+                        iframeFields = "&AMOUNT=" + quote.getTotals()()['base_grand_total'] +
                             "&TRANSACTION_TYPE=" + window.checkoutConfig.payment.bluepay_payment.transType +
                             "&RRNO=" + this.token +
                             "&NAME1=" + window.checkoutConfig.payment.bluepay_payment.customerName1 +
@@ -476,7 +476,7 @@ define(
                     jQuery("#bluepay_payment_stored_acct_div").hide();
                     jQuery("#bluepay_payment_stored_acct_cb_div").hide();
                 }
-                iframeFields = "&AMOUNT=" + quote.getTotals()()['grand_total'] +
+                iframeFields = "&AMOUNT=" + quote.getTotals()()['base_grand_total'] +
                     "&TRANSACTION_TYPE=" + transType +
                     "&PAYMENT_TYPE=" + paymentType +
                     "&NAME1=" + name1 +
