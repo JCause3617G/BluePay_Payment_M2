@@ -450,8 +450,8 @@ class Payment extends \Magento\Payment\Model\Method\Cc
 
         $comment = "";
         $i = 1;
-        foreach ($session->getQuote()->getAllItems() as $item) {
-            $comment .= $item->getQty() . ' ';
+        foreach ($order->getAllItems() as $item) {
+            $comment .= $item->getQtyOrdered() . ' ';
             $comment .= '[' . $item->getSku() . ']' . ' ';
             $comment .= $item->getName() . ' ';
             $comment .= $item->getDescription() . ' ';
@@ -459,16 +459,38 @@ class Payment extends \Magento\Payment\Model\Method\Cc
 
             $request["lv3_item".$i."_product_code"] = $item->getSku();
             $request["lv3_item".$i."_unit_cost"] = $item->getPrice();
-            $request["lv3_item".$i."_quantity"] = $item->getQty();
+            $request["lv3_item".$i."_quantity"] = $item->getQtyOrdered();
             $request["lv3_item".$i."_item_descriptor"] = $item->getName();
             $request["lv3_item".$i."_measure_units"] = 'EA';
             $request["lv3_item".$i."_commodity_code"] = '-';
             $request["lv3_item".$i."_tax_amount"] = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
             $request["lv3_item".$i."_tax_rate"] = $item->getTaxPercent() . '%';
             $request["lv3_item".$i."_item_discount"] = '';
-            $request["lv3_item".$i."_line_item_total"] = $item->getPrice() * $item->getQty();
+            $request["lv3_item".$i."_line_item_total"] = $item->getPrice() * $item->getQtyOrdered();
             $i++;
         }
+
+        // Add information for level 2 processing
+        $item = $order->getAllItems()[0];
+        $firstName = $order->getBillingAddress()["firstname"] ?? "";
+        $lastName = $order->getBillingAddress()["lastname"] ?? "";
+        $billName = ($firstName != "" && $lastName != "") ? $firstName . " " . $lastName : $firstName . $lastName;
+        $firstName = $order->getShippingAddress()["firstname"] ?? "";
+        $lastName = $order->getShippingAddress()["lastname"] ?? "";
+        $shipName = ($firstName != "" && $lastName != "") ? $firstName . " " . $lastName : $firstName . $lastName;
+
+        $request["AMOUNT_TAX"] = $order->getTaxAmount() ?? "";
+        $request["LV2_ITEM_TAX_RATE"] = $item->getTaxPercent() . "%";
+        $request["LV2_ITEM_SHIPPING_AMOUNT"] = $order->getShippingAmount() ?? "";
+        $request["LV2_ITEM_DISCOUNT_AMOUNT"] = $order->getDiscountAmount() ?? "";
+        $request["LV2_ITEM_TAX_ID"] = $order->getCustomerTaxvat() ?? "";;
+        $request["LV2_ITEM_BUYER_NAME"] = $billName;
+        $request["LV2_ITEM_SHIP_NAME"] = $shipName;
+        $request["LV2_ITEM_SHIP_ADDR1"] = $order->getShippingAddress()["street"] ?? "";
+        $request["LV2_ITEM_SHIP_CITY"] = $order->getShippingAddress()["city"] ?? "";
+        $request["LV2_ITEM_SHIP_STATE"] = $order->getShippingAddress()["region"] ?? "";
+        $request["LV2_ITEM_SHIP_ZIP"] = $order->getShippingAddress()["post_code"] ?? "";
+        $request["LV2_ITEM_SHIP_COUNTRY"] = $order->getShippingAddress()["country_id"] ?? "";
 
         if (!empty($order)) {
             $billing = $order->getBillingAddress();
