@@ -320,7 +320,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         case self::RESPONSE_CODE_DECLINED:
             throw new \Magento\Framework\Exception\LocalizedException(__('The transaction has been declined.'));
         case self::RESPONSE_CODE_ERROR:
-            if ($result->getMessage() == 'Already%20Captured') {
+            if ($result->getMessage() == 'Already Captured') {
                 $payment->setTransactionType(self::REQUEST_TYPE_AUTH_CAPTURE);
                 $request=$this->_buildRequest($payment);
                 $result =$this->_postRequest($request);
