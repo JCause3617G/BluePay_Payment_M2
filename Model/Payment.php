@@ -494,6 +494,11 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         $request["LV2_ITEM_SHIP_ZIP"] = $order->getShippingAddress()["post_code"] != null ? $order->getShippingAddress()["post_code"] : "";
         $request["LV2_ITEM_SHIP_COUNTRY"] = $order->getShippingAddress()["country_id"] != null ? $order->getShippingAddress()["country_id"] : "";
 
+        // Add customer IP address
+        $om = \Magento\Framework\App\ObjectManager::getInstance();
+        $a = $om->get('Magento\Framework\HTTP\PhpEnvironment\RemoteAddress');
+        $request["CUSTOMER_IP"] = $a->getRemoteAddress();
+
         if (!empty($order)) {
             $billing = $order->getBillingAddress();
             if (!empty($billing)) {
@@ -538,12 +543,6 @@ class Payment extends \Magento\Payment\Model\Method\Cc
     public function _postRequest(\Magento\Framework\DataObject $request)
     {
         $info = $this->getInfoInstance();
-
-        // Add customer IP address
-        $om = \Magento\Framework\App\ObjectManager::getInstance();
-        $a = $om->get('Magento\Framework\HTTP\PhpEnvironment\RemoteAddress');
-        $request["CUSTOMER_IP"] = $a->getRemoteAddress();
-
         $result = $this->responseFactory->create();
         if ($info->getIframe() == "1" && $info->getTransactionType() != "CAPTURE") {
             $result->setResult($info->getResult());
