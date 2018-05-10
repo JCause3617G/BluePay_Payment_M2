@@ -131,16 +131,18 @@ define(
                     var paymentType = jQuery("#bluepay_payment_payment_type").val();
                     var transType = jQuery("#bluepay_payment_payment_type").val() == 'ACH' ? 'SALE' : window.checkoutConfig.payment.bluepay_payment.transType;
                     if (quote.billingAddress()) {
-                        var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : quote.billingAddress().firstname;
-                        var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : quote.billingAddress().lastname;
-                        var company = window.checkoutConfig.payment.bluepay_payment.customerCompany != null  && window.checkoutConfig.payment.bluepay_payment.customerCompany != '' ? window.checkoutConfig.payment.bluepay_payment.customerCompany : quote.billingAddress().company;
+                        var name1 = quote.billingAddress().firstname;
+                        var name2 = quote.billingAddress().lastname;
+                        var company = quote.billingAddress().company;
                         company = company != undefined ? company : '';
-                        var email = window.checkoutConfig.payment.bluepay_payment.customerEmail != null && window.checkoutConfig.payment.bluepay_payment.customerEmail != '' ? window.checkoutConfig.payment.bluepay_payment.customerEmail : quote.billingAddress().email;
-                        email = email != '' && email != null ? email : quote.guestEmail;
-                        var addr1 = window.checkoutConfig.payment.bluepay_payment.customerStreet != null && window.checkoutConfig.payment.bluepay_payment.customerStreet != '' ? window.checkoutConfig.payment.bluepay_payment.customerStreet : quote.billingAddress().street[0];
-                        var city = window.checkoutConfig.payment.bluepay_payment.customerCity != null && window.checkoutConfig.payment.bluepay_payment.customerCity != '' ? window.checkoutConfig.payment.bluepay_payment.customerCity : quote.billingAddress().city;
-                        var state = window.checkoutConfig.payment.bluepay_payment.customerRegion != null && window.checkoutConfig.payment.bluepay_payment.customerRegion != '' ? window.checkoutConfig.payment.bluepay_payment.customerRegion : quote.billingAddress().region;
-                        var zip = window.checkoutConfig.payment.bluepay_payment.customerZip != null && window.checkoutConfig.payment.bluepay_payment.customerZip != '' ? window.checkoutConfig.payment.bluepay_payment.customerZip : quote.billingAddress().postcode;
+                        var email = quote.billingAddress().email;
+                        if (email == undefined) {
+                            email = quote.guestEmail != undefined ? quote.guestEmail : window.checkoutConfig.payment.bluepay_payment.customerEmail;
+                        }
+                        var addr1 = quote.billingAddress().street[0];
+                        var city = quote.billingAddress().city;
+                        var state = quote.billingAddress().region;
+                        var zip = quote.billingAddress().postcode;
                     } else {
                         var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : '';
                         var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : '';
@@ -163,6 +165,7 @@ define(
                         "&CITY=" + city +
                         "&STATE=" + state +
                         "&ZIPCODE=" + zip +
+                        "&CUSTOMER_IP=" + encodeURIComponent(window.checkoutConfig.payment.bluepay_payment.customerIP) +
                         "&MERCHANT=" + window.checkoutConfig.payment.bluepay_payment.accountId + 
                         "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                         "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
@@ -180,6 +183,10 @@ define(
                 //this.paymentType = 'CC';
 
                 this.paymentType.subscribe(function (value) {
+                    initIframe();
+                });
+
+                quote.billingAddress.subscribe(function (value) {
                     initIframe();
                 });
 
@@ -245,6 +252,7 @@ define(
                             "&ADDR1=" + window.checkoutConfig.payment.bluepay_payment.customerStreet +
                             "&CITY=" + window.checkoutConfig.payment.bluepay_payment.customerCity +
                             "&STATE=" + window.checkoutConfig.payment.bluepay_payment.customerRegion +
+                            "&CUSTOMER_IP=" + encodeURIComponent(window.checkoutConfig.payment.bluepay_payment.customerIP) +
                             "&ZIPCODE=" + window.checkoutConfig.payment.bluepay_payment.customerZip +
                             "&MERCHANT=" + window.checkoutConfig.payment.bluepay_payment.accountId + 
                             "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
@@ -450,16 +458,18 @@ define(
                 var paymentType = jQuery("#bluepay_payment_payment_type").val();
                 var transType = jQuery("#bluepay_payment_payment_type").val() == 'ACH' ? 'SALE' : window.checkoutConfig.payment.bluepay_payment.transType;
                 if (quote.billingAddress()) {
-                    var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : quote.billingAddress().firstname;
-                    var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : quote.billingAddress().lastname;
-                    var company = window.checkoutConfig.payment.bluepay_payment.customerCompany != null  && window.checkoutConfig.payment.bluepay_payment.customerCompany != '' ? window.checkoutConfig.payment.bluepay_payment.customerCompany : quote.billingAddress().company;
+                    var name1 = quote.billingAddress().firstname;
+                    var name2 = quote.billingAddress().lastname;
+                    var company = quote.billingAddress().company;
                     company = company != undefined ? company : '';
-                    var email = window.checkoutConfig.payment.bluepay_payment.customerEmail != null && window.checkoutConfig.payment.bluepay_payment.customerEmail != '' ? window.checkoutConfig.payment.bluepay_payment.customerEmail : quote.billingAddress().email;
-                    email = email != '' && email != null ? email : quote.guestEmail;
-                    var addr1 = window.checkoutConfig.payment.bluepay_payment.customerStreet != null && window.checkoutConfig.payment.bluepay_payment.customerStreet != '' ? window.checkoutConfig.payment.bluepay_payment.customerStreet : quote.billingAddress().street[0];
-                    var city = window.checkoutConfig.payment.bluepay_payment.customerCity != null && window.checkoutConfig.payment.bluepay_payment.customerCity != '' ? window.checkoutConfig.payment.bluepay_payment.customerCity : quote.billingAddress().city;
-                    var state = window.checkoutConfig.payment.bluepay_payment.customerRegion != null && window.checkoutConfig.payment.bluepay_payment.customerRegion != '' ? window.checkoutConfig.payment.bluepay_payment.customerRegion : quote.billingAddress().region;
-                    var zip = window.checkoutConfig.payment.bluepay_payment.customerZip != null && window.checkoutConfig.payment.bluepay_payment.customerZip != '' ? window.checkoutConfig.payment.bluepay_payment.customerZip : quote.billingAddress().postcode;
+                    var email = quote.billingAddress().email;
+                    if (email == undefined) {
+                        email = quote.guestEmail != undefined ? quote.guestEmail : window.checkoutConfig.payment.bluepay_payment.customerEmail;
+                    }
+                    var addr1 = quote.billingAddress().street[0];
+                    var city = quote.billingAddress().city;
+                    var state = quote.billingAddress().region;
+                    var zip = quote.billingAddress().postcode;
                 } else {
                     var name1 = window.checkoutConfig.payment.bluepay_payment.customerName1 != null && window.checkoutConfig.payment.bluepay_payment.customerName1 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName1 : '';
                     var name2 = window.checkoutConfig.payment.bluepay_payment.customerName2 != null && window.checkoutConfig.payment.bluepay_payment.customerName2 != '' ? window.checkoutConfig.payment.bluepay_payment.customerName2 : '';
@@ -487,6 +497,7 @@ define(
                     "&CITY=" + city +
                     "&STATE=" + state +
                     "&ZIPCODE=" + zip +
+                    "&CUSTOMER_IP=" + encodeURIComponent(window.checkoutConfig.payment.bluepay_payment.customerIP) +
                     "&MERCHANT=" + window.checkoutConfig.payment.bluepay_payment.accountId + 
                     "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                     "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
