@@ -150,19 +150,19 @@ class ConfigProvider implements ConfigProviderInterface
         $tps = hash('sha512', $hashstr);
         $i = 1;
         $level3 = [];
-        foreach ($this->cart->getQuote()->getAllItems() as $item) {
-            $level3["LV3_ITEM".$i."_PRODUCT_CODE"] = htmlentities($item->getSku());
-            $level3["LV3_ITEM".$i."_UNIT_COST"] = $item->getPrice();
-            $level3["LV3_ITEM".$i."_QUANTITY"] = $item->getQty();
-            $level3["LV3_ITEM".$i."_ITEM_DESCRIPTOR"] = htmlentities($item->getName());
-            $level3["LV3_ITEM".$i."_MEASURE_UNITS"] = 'EA';
-            $level3["LV3_ITEM".$i."_COMMODITY_CODE"] = '-';
-            $level3["LV3_ITEM".$i."_TAX_AMOUNT"] = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
-            $level3["LV3_ITEM".$i."_TAX_RATE"] = $item->getTaxPercent() . '%';
-            $level3["LV3_ITEM".$i."_ITEM_DISCOUNT"] = '';
-            $level3["LV3_ITEM".$i."_LINE_ITEM_TOTAL"] = $item->getPrice() * $item->getQty();
-            $i++;
-        }
+        // foreach ($this->cart->getQuote()->getAllItems() as $item) {
+        //     $level3["LV3_ITEM".$i."_PRODUCT_CODE"] = htmlentities($item->getSku());
+        //     $level3["LV3_ITEM".$i."_UNIT_COST"] = $item->getPrice();
+        //     $level3["LV3_ITEM".$i."_QUANTITY"] = $item->getQty();
+        //     $level3["LV3_ITEM".$i."_ITEM_DESCRIPTOR"] = htmlentities($item->getName());
+        //     $level3["LV3_ITEM".$i."_MEASURE_UNITS"] = 'EA';
+        //     $level3["LV3_ITEM".$i."_COMMODITY_CODE"] = '-';
+        //     $level3["LV3_ITEM".$i."_TAX_AMOUNT"] = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
+        //     $level3["LV3_ITEM".$i."_TAX_RATE"] = $item->getTaxPercent() . '%';
+        //     $level3["LV3_ITEM".$i."_ITEM_DISCOUNT"] = '';
+        //     $level3["LV3_ITEM".$i."_LINE_ITEM_TOTAL"] = $item->getPrice() * $item->getQty();
+        //     $i++;
+        // }
 
         $config = [
             'payment' => [
