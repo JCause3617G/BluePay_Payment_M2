@@ -170,6 +170,7 @@ define(
                         "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                         "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
                         "&MODE=" + window.checkoutConfig.payment.bluepay_payment.transMode +
+                        "&ORDER_ID=" + window.checkoutConfig.payment.bluepay_payment.reservedOrderId + 
                         "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
                         $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
                             iframeFields += '&' + key + '=' + encodeURIComponent(value);
@@ -258,6 +259,7 @@ define(
                             "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                             "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
                             "&MODE=" + window.checkoutConfig.payment.bluepay_payment.transMode +
+                            "&ORDER_ID=" + window.checkoutConfig.payment.bluepay_payment.reservedOrderId + 
                             "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
                             $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
                                 iframeFields += '&' + key + '=' + encodeURIComponent(value);
@@ -502,6 +504,7 @@ define(
                     "&TAMPER_PROOF_SEAL=" + window.checkoutConfig.payment.bluepay_payment.tps +
                     "&USE_CVV2=" + window.checkoutConfig.payment.bluepay_payment.useCvv2 +
                     "&MODE=" + window.checkoutConfig.payment.bluepay_payment.transMode +
+                    "&ORDER_ID=" + window.checkoutConfig.payment.bluepay_payment.reservedOrderId + 
                     "&TPS_DEF=" + window.checkoutConfig.payment.bluepay_payment.tpsDef;
                     $.each(window.checkoutConfig.payment.bluepay_payment.level3, function( key, value ) {
                         iframeFields += '&' + key + '=' + encodeURIComponent(value);

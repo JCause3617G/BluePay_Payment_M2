@@ -148,6 +148,7 @@ class ConfigProvider implements ConfigProviderInterface
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             );
         $tps = hash('sha512', $hashstr);
+        $this->cart->getQuote()->reserveOrderId()->save();
         $i = 1;
         $level3 = [];
         // foreach ($this->cart->getQuote()->getAllItems() as $item) {
@@ -213,6 +214,7 @@ class ConfigProvider implements ConfigProviderInterface
                         \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                     ),
                     'level3' => $level3,
+                    'reservedOrderId' => $this->cart->getQuote()->getReservedOrderId(),
                     'quoteData' => $this->cart->getQuote()->getData(),
                     'customerName1' => $name1,
                     'customerName2' => $name2,
