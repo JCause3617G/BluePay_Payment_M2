@@ -417,7 +417,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         }
         $request = $this->requestFactory->create();
         if ($order && $order->getIncrementId()) {
-            $request->setInvoiceId($order->getIncrementId());
+            $request->setOrderId($order->getIncrementId());
         }
         $request->setMode(($this->getConfigData('trans_mode') == 'TEST') ? 'TEST' : 'LIVE');
         $request->setTpsHashType('SHA512');
