@@ -449,28 +449,28 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         $session = $this->checkoutSession;
 
         $comment = "";
-        $i = 1;
-        foreach ($order->getAllItems() as $item) {
-            $comment .= $item->getQtyOrdered() . ' ';
-            $comment .= '[' . $item->getSku() . ']' . ' ';
-            $comment .= $item->getName() . ' ';
-            $comment .= $item->getDescription() . ' ';
-            $comment .= $item->getPrice() . ' ';
+        // $i = 1;
+        // foreach ($order->getAllItems() as $item) {
+        //     $comment .= $item->getQtyOrdered() . ' ';
+        //     $comment .= '[' . $item->getSku() . ']' . ' ';
+        //     $comment .= $item->getName() . ' ';
+        //     $comment .= $item->getDescription() . ' ';
+        //     $comment .= $item->getPrice() . ' ';
 
-            $tax = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
+        //     $tax = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
 
-            $request["lv3_item".$i."_product_code"] = $item->getSku();
-            $request["lv3_item".$i."_unit_cost"] = $item->getPrice();
-            $request["lv3_item".$i."_quantity"] = $item->getQtyOrdered();
-            $request["lv3_item".$i."_item_descriptor"] = $item->getName();
-            $request["lv3_item".$i."_measure_units"] = 'EA';
-            $request["lv3_item".$i."_commodity_code"] = '-';
-            $request["lv3_item".$i."_tax_amount"] = $tax;
-            $request["lv3_item".$i."_tax_rate"] = $item->getTaxPercent() . '%';
-            $request["lv3_item".$i."_item_discount"] = '';
-            $request["lv3_item".$i."_line_item_total"] = $item->getPrice() * $item->getQtyOrdered() + $tax;
-            $i++;
-        }
+        //     $request["lv3_item".$i."_product_code"] = $item->getSku();
+        //     $request["lv3_item".$i."_unit_cost"] = $item->getPrice();
+        //     $request["lv3_item".$i."_quantity"] = $item->getQtyOrdered();
+        //     $request["lv3_item".$i."_item_descriptor"] = $item->getName();
+        //     $request["lv3_item".$i."_measure_units"] = 'EA';
+        //     $request["lv3_item".$i."_commodity_code"] = '-';
+        //     $request["lv3_item".$i."_tax_amount"] = $tax;
+        //     $request["lv3_item".$i."_tax_rate"] = $item->getTaxPercent() . '%';
+        //     $request["lv3_item".$i."_item_discount"] = '';
+        //     $request["lv3_item".$i."_line_item_total"] = $item->getPrice() * $item->getQtyOrdered() + $tax;
+        //     $i++;
+        // }
 
         // Add information for level 2 processing
         $item = $order->getAllItems()[0];
