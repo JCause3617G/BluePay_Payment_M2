@@ -11,7 +11,7 @@
     <body>
         <referenceContainer name="content">
             <container name="result_message" label="Main Content Container" htmlTag="div" htmlClass="column content" htmlId="result_message" />
-            <block class="BluePay\Payment\Block\Customer\Form" name="bluepay_payment_customer_storedacct" template="BluePay_Payment::payment-form.phtml" />
+            <block class="BluePay\Payment\Block\Customer\Form" name="bluepay_payment_customer_storedacct" template="BluePay_Payment::payment-form.phtml" cacheable="false"/>
         </referenceContainer>
     </body>
 </page>
