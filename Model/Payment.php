@@ -421,7 +421,10 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         }
         $request->setMode(($this->getConfigData('trans_mode') == 'TEST') ? 'TEST' : 'LIVE');
         $request->setTpsHashType('SHA512');
-        if ($payment->getAdditionalInformation('token') != '' && !$payment->getRrno()) {
+        if ($payment->getToken() != '' && !$payment->getRrno()) {
+            $request->setRrno($payment->getToken());
+            $payment->setRrno($payment->getToken());
+        } else if ($payment->getAdditionalInformation('token') != '' && !$payment->getRrno()) {
             $request->setRrno($payment->getAdditionalInformation('token'));
             $payment->setRrno($payment->getAdditionalInformation('token'));
         }
