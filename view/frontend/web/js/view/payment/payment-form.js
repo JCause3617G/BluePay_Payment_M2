@@ -191,9 +191,9 @@ define(
                         'cc_exp_year': creditCardData.expirationYear,
                         'cc_number': creditCardData.creditCardNumber,
                         'payment_type': this.getPaymentType(),
-                        //'echeck_acct_type': document.getElementById("bluepay_payment_echeck_acct_type").value,
-                        //'echeck_acct_number': document.getElementById("bluepay_payment_echeck_acct_number").value,
-                        //'echeck_routing_number': document.getElementById("bluepay_payment_echeck_routing_number").value,
+                        'echeck_acct_type': document.getElementById("bluepay_payment_echeck_acct_type").value,
+                        'echeck_account_number': document.getElementById("bluepay_payment_echeck_acct_number").value,
+                        'echeck_routing_number': document.getElementById("bluepay_payment_echeck_routing_number").value,
                         'token': creditCardData.token,
                         'save_payment_info': creditCardData.saveInfo
                     }

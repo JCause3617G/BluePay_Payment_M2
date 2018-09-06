@@ -94,6 +94,10 @@ class Request extends \Magento\Framework\App\Action\Action
     public function saveCustomerPaymentInfo()
     {
         $customer = $this->customerRegistry->retrieve($this->customerSession->getId());
+        if(!$customer){
+            error_log('An error occured while saving payment info: customer not logged in.');
+            return;
+        }
         $customerData = $this->customerSession->getCustomerData();
         $paymentAcctString = $customerData->getCustomAttribute('bluepay_stored_accts') ?
         $customerData->getCustomAttribute('bluepay_stored_accts')->getValue() : '';
@@ -102,6 +106,10 @@ class Request extends \Magento\Framework\App\Action\Action
         $newCardType = $this->getRequest()->getPost('cc_type');
         $newCcExpMonth = $this->getRequest()->getPost('cc_expire_mm');
         $newCcExpYear = $this->getRequest()->getPost('cc_expire_yy');
+        if ($this->getRequest()->getPost('payment_type') != 'ACH' && (!$newCcExpMonth || !$newCcExpYear)){
+            error_log('An error occured while saving payment info: missing expiration date.');
+            return;
+        }
         $newPaymentAccount = $this->getRequest()->getPost('payment_account_mask');
         // This is a brand new payment account
         if ($oldToken == '') {
