@@ -62,7 +62,7 @@ class Storedacct extends \Magento\Framework\App\Action\Action
             $messageBlock->getMessageCollection()->clear();
         } else {
             $messageBlock = $resultPage->getLayout()->createBlock(
-                'Magento\Framework\View\Element\Messages',
+                'Magento\Framework\View\Element\Messages', 
                 'result'
             );
         }
@@ -71,10 +71,14 @@ class Storedacct extends \Magento\Framework\App\Action\Action
             return $resultPage;
         } else if ($this->getRequest()->getParams()['result'] == "3") {
             $messageBlock->addSuccess('Payment account successfully deleted.');
-        } elseif (strtoupper($this->getRequest()->getParams()['result']) == "APPROVED") {
+        } else if (strtoupper($this->getRequest()->getParams()['result']) == "APPROVED") {
             $messageBlock->addSuccess('Payment account successfully saved.');
-        } else {
-$messageBlock->addError('An error occurred when saving the payment account. Reason: ' .
+        } else if (
+            strtoupper($this->getRequest()->getParams()['result']) == "MISSING" || 
+            strtoupper($this->getRequest()->getParams()['result']) == "ERROR" ||
+            $this->getRequest()->getParams()['result'] == "0"
+        ) {
+            $messageBlock->addError('An error occurred when saving the payment account. Reason: ' .
             $this->getRequest()->getParams()['message']);
         }
         $resultPage->getLayout()->setChild(

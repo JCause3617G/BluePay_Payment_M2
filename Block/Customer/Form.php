@@ -117,6 +117,9 @@ class Form extends \Magento\Framework\View\Element\Template
             return;
         $customer = $this->customerRegistry->retrieve($this->customerSession->getCustomerId());
         $customerData = $customer->getDataModel();
+        $firstName = $this->getCustomerData() !== null ? $this->getCustomerData()->getFirstName() : $this->getCustomerName()->getFirstName();
+        $lastName = $this->getCustomerData() !== null ? $this->getCustomerData()->getLastName() : $this->getCustomerName()->getLastName();
+        $companyName = $this->getCustomerData() !== null ? $this->getCustomerData()->getCompany() : ''; 
         $hashstr = $this->_scopeConfig->getValue(
             'payment/bluepay_payment/secret_key',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
@@ -125,9 +128,9 @@ class Form extends \Magento\Framework\View\Element\Template
                 'payment/bluepay_payment/account_id',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
-            $this->getCustomerData()->getFirstName() .
-            $this->getCustomerData()->getLastName() .
-            $this->getCustomerData()->getCompany() .
+            $firstName .
+            $lastName .
+            $companyName .
             $this->_scopeConfig->getValue(
             'payment/bluepay_payment/trans_mode',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE

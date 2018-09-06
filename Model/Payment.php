@@ -410,7 +410,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         $order = $payment->getOrder();
         $this->setStore($order->getStoreId());
         $request = $this->requestFactory->create();
-        if (!$payment->getPaymentType() || $payment->getPaymentType() == 'CC') {
+        if (!$payment->getAdditionalInformation('payment_type') || $payment->getAdditionalInformation('payment_type') == 'CC') {
             $payment->setPaymentType(self::REQUEST_METHOD_CC);
         } else {
             $payment->setPaymentType(self::REQUEST_METHOD_ECHECK);
@@ -430,7 +430,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         }
         $request->setMerchant($this->getConfigData('account_id'))
             ->setTransactionType($payment->getTransactionType())
-            ->setPaymentType($payment->getPaymentType())
+            ->setPaymentType($payment->getAdditionalInformation('payment_type'))
             ->setResponseversion('3')
             ->setTamperProofSeal($this->calcTPS($payment));
         if ($payment->getAmount()) {
@@ -534,9 +534,9 @@ class Payment extends \Magento\Payment\Model\Method\Cc
                 break;
 
             case self::REQUEST_METHOD_ECHECK:
-                $request->setAchRouting($info->getEcheckRoutingNumber())
-                    ->setAchAccount($info->getEcheckAcctNumber())
-                    ->setAchAccountType($info->getEcheckAcctType())
+                $request->setAchRouting($info->getAdditionalInformation('echeck_routing_number'))
+                    ->setAchAccount($info->getAdditionalInformation('echeck_account_number'))
+                    ->setAchAccountType($info->getAdditionalInformation('echeck_acct_type'))
                     ->setDocType('WEB');
                 break;
         }
