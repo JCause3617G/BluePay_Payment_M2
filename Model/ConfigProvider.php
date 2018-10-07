@@ -120,16 +120,20 @@ class ConfigProvider implements ConfigProviderInterface
         } else {
             $customer = $this->customerRegistry->retrieve($customerId);
             $customerData = $customer->getDataModel();
-            $name1 = $customerData->getAddresses() ? $customerData->getAddresses()[0]->getFirstName() : '';
-            $name2 = $customerData->getAddresses() ? $customerData->getAddresses()[0]->getLastName() : '';
-            $company = $customerData->getAddresses() && $customerData->getAddresses()[0]->getCompany() != null ? $customerData->getAddresses()[0]->getCompany() : '';
-            $street = $customerData->getAddresses() ? $customerData->getAddresses()[0]->getStreet()[0] : '';
-            $city = $customerData->getAddresses() && $customerData->getAddresses()[0]->getCity() != null ? $customerData->getAddresses()[0]->getCity() : '';
-            $state = $customerData->getAddresses() ? $customerData->getAddresses()[0]->getRegion()->getRegionCode() : '';
-            $zip = $customerData->getAddresses() ? $customerData->getAddresses()[0]->getPostCode() : '';
+            $name1 = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getFirstName() : '';
+            $name2 = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getLastName() : '';
+            $company = $customerData->getAddresses() != null && $customerData->getAddresses()[0]->getCompany() != null ? $customerData->getAddresses()[0]->getCompany() : '';
+            $street = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getStreet()[0] : '';
+            $city = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getCity() : '';
+            $state = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getRegion()->getRegionCode() : '';
+            $zip = $customerData->getAddresses() != null ? $customerData->getAddresses()[0]->getPostCode() : '';
             $email = $customerData->getEmail();
         }
 
+        $transType = $this->scopeConfiguration->getValue(
+            'payment/bluepay_payment/payment_action',
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        ) == "authorize" ? "AUTH" : "SALE";
         $hashstr = $this->scopeConfiguration->getValue(
             'payment/bluepay_payment/secret_key',
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
@@ -138,20 +142,28 @@ class ConfigProvider implements ConfigProviderInterface
                 'payment/bluepay_payment/account_id',
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             ) .
-            $company . 
-            $street . 
-            $city .
-            $state .
-            $zip .
+            //$transType .
             $this->scopeConfiguration->getValue(
-            'payment/bluepay_payment/trans_mode',
-            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-        );
+                'payment/bluepay_payment/trans_mode',
+                \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+            );
         $tps = hash('sha512', $hashstr);
-        $transType = $this->scopeConfiguration->getValue(
-                        'payment/bluepay_payment/payment_action',
-                        \Magento\Store\Model\ScopeInterface::SCOPE_STORE
-                    ) == "authorize" ? "AUTH" : "SALE";
+        $this->cart->getQuote()->reserveOrderId()->save();
+        $i = 1;
+        $level3 = [];
+        // foreach ($this->cart->getQuote()->getAllItems() as $item) {
+        //     $level3["LV3_ITEM".$i."_PRODUCT_CODE"] = htmlentities($item->getSku());
+        //     $level3["LV3_ITEM".$i."_UNIT_COST"] = $item->getPrice();
+        //     $level3["LV3_ITEM".$i."_QUANTITY"] = $item->getQty();
+        //     $level3["LV3_ITEM".$i."_ITEM_DESCRIPTOR"] = htmlentities($item->getName());
+        //     $level3["LV3_ITEM".$i."_MEASURE_UNITS"] = 'EA';
+        //     $level3["LV3_ITEM".$i."_COMMODITY_CODE"] = '-';
+        //     $level3["LV3_ITEM".$i."_TAX_AMOUNT"] = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
+        //     $level3["LV3_ITEM".$i."_TAX_RATE"] = $item->getTaxPercent() . '%';
+        //     $level3["LV3_ITEM".$i."_ITEM_DISCOUNT"] = '';
+        //     $level3["LV3_ITEM".$i."_LINE_ITEM_TOTAL"] = $item->getPrice() * $item->getQty();
+        //     $i++;
+        // }
 
         $config = [
             'payment' => [
@@ -161,8 +173,12 @@ class ConfigProvider implements ConfigProviderInterface
                         \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                     ),
                     'tps' => $tps,
-                    'tpsDef' => "MERCHANT COMPANY_NAME ADDR1 CITY STATE ZIPCODE MODE",
+                    'tpsDef' => "MERCHANT MODE",
                     'transType' => $transType,
+                    'transMode' => $this->scopeConfiguration->getValue(
+                        'payment/bluepay_payment/trans_mode',
+                        \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+                    ),
                     'cctypes' => $this->scopeConfiguration->getValue(
                         'payment/bluepay_payment/cctypes',
                         \Magento\Store\Model\ScopeInterface::SCOPE_STORE
@@ -197,6 +213,8 @@ class ConfigProvider implements ConfigProviderInterface
                         'payment/bluepay_payment/useccv',
                         \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                     ),
+                    'level3' => $level3,
+                    'reservedOrderId' => $this->cart->getQuote()->getReservedOrderId(),
                     'quoteData' => $this->cart->getQuote()->getData(),
                     'customerName1' => $name1,
                     'customerName2' => $name2,

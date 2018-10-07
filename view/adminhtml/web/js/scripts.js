@@ -35,7 +35,7 @@ define([
             this.isOnlyVirtualProduct = false;
             this.excludedPaymentMethods = [];
             this.summarizePrice = true;
-            this.test = '0';
+            this.shippingMethod = jQuery('#bluepay_payment_shipping_method').val() != "" ? jQuery('#bluepay_payment_shipping_method').val() : data['shipping_method'];
             response = '0';
             window.addEventListener("message", receiveMessage, false);
             function receiveMessage(event)
@@ -47,18 +47,32 @@ define([
                     alert({content: event.data});
                     return;
                 }
+                jQuery('#bluepay_payment_payment_type').attr('disabled', false);
+                jQuery('#bluepay_payment_stored_acct').attr('disabled', false);
+                jQuery('#bluepay_payment_cc_number').attr('disabled', false);
+                jQuery('#bluepay_payment_cc_type').attr('disabled', false);
+                jQuery('#bluepay_payment_cc_expire').attr('disabled', false);
+                jQuery('#bluepay_payment_token').attr('disabled', false);
+                jQuery('#bluepay_payment_ach_account_type').attr('disabled', false);
+                jQuery('#bluepay_payment_ach_account').attr('disabled', false);
+                jQuery('#bluepay_payment_ach_routing').attr('disabled', false);
+                jQuery('#bluepay_payment_iframe').attr('disabled', false);
+                jQuery('#bluepay_payment_result').attr('disabled', false);
+                jQuery('#bluepay_payment_message').attr('disabled', false);
+                jQuery('#bluepay_payment_trans_type').attr('disabled', false);
                 if (event.data["PAYMENT_TYPE"] == "CREDIT" || event.data["PAYMENT_TYPE"] == "CC") {
-                        jQuery("#bluepay_payment_cc_number").val(event.data["PAYMENT_ACCOUNT"]);
-                        jQuery("#bluepay_payment_cc_expire").val(event.data["CARD_EXPIRE"]);
-                        jQuery("#bluepay_payment_cc_type").val(event.data["CARD_TYPE"]);
-                        //creditCardData.expirationMonth = event.data["CARD_EXPIRE"].substring(0, 2);
-                        //creditCardData.expirationYear = event.data["CARD_EXPIRE"].substring(2, 4);
+                    jQuery("#bluepay_payment_cc_number").val(event.data["PAYMENT_ACCOUNT"]);
+                    jQuery("#bluepay_payment_cc_expire").val(event.data["CARD_EXPIRE"]);
+                    jQuery("#bluepay_payment_cc_type").val(event.data["CARD_TYPE"]);
+                    //creditCardData.expirationMonth = event.data["CARD_EXPIRE"].substring(0, 2);
+                    //creditCardData.expirationYear = event.data["CARD_EXPIRE"].substring(2, 4);
                 } else if (event.data["PAYMENT_TYPE"] == "ACH") {
-                        jQuery("#bluepay_payment_ach_account_type").val(event.data["ACH_ACCOUNT_TYPE"]);
-                        //jQuery("#bluepay_payment_ach_account").val(event.data["CARD_EXPIRE"]);
-                        jQuery("#bluepay_payment_ach_routing").val(event.data["ACH_ROUTING"]);
-                        jQuery("#bluepay_payment_cc_type").val('OT');
+                    jQuery("#bluepay_payment_ach_account_type").val(event.data["ACH_ACCOUNT_TYPE"]);
+                    //jQuery("#bluepay_payment_ach_account").val(event.data["CARD_EXPIRE"]);
+                    jQuery("#bluepay_payment_ach_routing").val(event.data["ACH_ROUTING"]);
+                    jQuery("#bluepay_payment_cc_type").val('OT');
                 }
+                jQuery("#bluepay_payment_trans_type").val(event.data["TRANS_TYPE"]);
                 jQuery("#bluepay_payment_result").val(event.data["Result"]);
                 jQuery("#bluepay_payment_message").val(event.data["MESSAGE"]);
                 jQuery("#bluepay_payment_token").val(event.data["RRNO"]);
@@ -376,6 +390,8 @@ define([
             var data = {};
             data['order[shipping_method]'] = method;
             this.loadArea(['shipping_method', 'totals', 'billing_method'], true, data);
+            this.shippingMethod = method;
+            this.setPaymentMethod("bluepay_payment");
         },
 
         switchPaymentMethod : function(method){
@@ -399,14 +415,13 @@ define([
                     }
                 });
             }
-
             if(!this.paymentMethod || method){
                 $('order-billing_method_form').select('input', 'select', 'textarea').each(function(elem){
                     if(elem.type != 'radio') elem.disabled = true;
                 })
             }
 
-            if ($('payment_form_'+method)){
+            if ($('payment_form_'+method)){                         
                 jQuery('#' + this.getAreaId('billing_method')).trigger('contentUpdated');
                 this.paymentMethod = method;
                 var form = 'payment_form_'+method;
@@ -425,6 +440,19 @@ define([
                         },this);
                     }
                 },this);
+            }
+            if (method == "bluepay_payment") {
+                jQuery("#bluepay_iframe").show();
+                jQuery("#bluepay_payment_payment_type").attr('disabled', false);
+                jQuery("#bluepay_payment_stored_acct").attr('disabled', false);
+                jQuery("#bluepay_payment_payment_type_div").show();
+                jQuery("#bluepay_payment_stored_acct_div").show();
+            } else {
+                jQuery("#bluepay_iframe").hide();
+                jQuery("#bluepay_payment_payment_type").attr('disabled', true);
+                jQuery("#bluepay_payment_stored_acct").attr('disabled', true);
+                jQuery("#bluepay_payment_payment_type_div").hide();
+                jQuery("#bluepay_payment_stored_acct_div").hide();
             }
         },
 
@@ -1174,11 +1202,40 @@ define([
         {
             jQuery('#edit_form').trigger('processStart');
             if (this.paymentMethod == 'bluepay_payment') {
-                var win = document.getElementById("iframe").contentWindow;
+                if (jQuery('#order-billing_address_firstname').val() == '' || jQuery('#order-billing_address_lastname').val() == '' || jQuery('#order-billing_address_street0').val() == ''
+                    || jQuery('#order-billing_address_city').val() == '' || jQuery('#order-billing_address_country_id').val() == '' || jQuery('#order-billing_address_region_id').val() == ''
+                    || jQuery('#order-billing_address_postcode').val() == '' || jQuery('#order-billing_address_postcode').val() == '') {  
+                    alert({
+                        content: 'Please fill out all billing address required fields'
+                        });
+                    jQuery('#edit_form').trigger('processStop');
+                    jQuery('#edit_form').off('invalid-form.validate');            
+                    return;
+                    }
+                if (jQuery('#order-shipping_address_firstname').val() == '' || jQuery('#order-shipping_address_lastname').val() == '' || jQuery('#order-shipping_address_street0').val() == ''
+                    || jQuery('#order-shipping_address_city').val() == '' || jQuery('#order-shipping_address_country_id').val() == '' || jQuery('#order-shipping_address_region_id').val() == ''
+                    || jQuery('#order-shipping_address_postcode').val() == '' || jQuery('#order-shipping_address_postcode').val() == '') {  
+                    alert({
+                        content: 'Please fill out all shipping address required fields'
+                        });
+                    jQuery('#edit_form').trigger('processStop');
+                    jQuery('#edit_form').off('invalid-form.validate');            
+                    return;
+                    }
+                if (!window.order.shippingMethod || window.order.shippingMethod == '') {
+                    alert({
+                        content: 'Please choose a shipping method'
+                    });
+                    jQuery('#edit_form').trigger('processStop');
+                    jQuery('#edit_form').off('invalid-form.validate');            
+                    return;
+                }          
+                var win = document.getElementById("bluepay_iframe").contentWindow;
                 win.postMessage("Submit", "*");
                 return;
             }
             jQuery('#edit_form').trigger('submitOrder');
+
         },
 
         _realSubmit: function () {
@@ -1189,6 +1246,7 @@ define([
                     jQuery('#edit_form').trigger('processStop');
                     jQuery('#edit_form').off('invalid-form.validate');
                 });
+
                 jQuery('#edit_form').triggerHandler('save');
             }
             if (this.orderItemChanged) {
@@ -1211,47 +1269,6 @@ define([
             }
             disableAndSave();
         },
-
-        /*_realSubmit: function () {
-            if (this.test != '0') {
-                var disableAndSave = function() {
-                disableElements('save');
-                jQuery('#edit_form').on('invalid-form.validate', function() {
-                    enableElements('save');
-                    jQuery('#edit_form').trigger('processStop');
-                    jQuery('#edit_form').off('invalid-form.validate');
-                });
-                jQuery('#edit_form').triggerHandler('save');
-            }
-            if (this.orderItemChanged) {
-                var self = this;
-
-                jQuery('#edit_form').trigger('processStop');
-
-                confirm({
-                    content: jQuery.mage.__('You have item changes'),
-                    actions: {
-                        confirm: function() {
-                            jQuery('#edit_form').trigger('processStart');
-                            disableAndSave();
-                        },
-                        cancel: function() {
-                            self.itemsUpdate();
-                        }
-                    }
-                });
-            } else if (this.paymentMethod == 'bluepay_payment') {
-                var win = document.getElementById("iframe").contentWindow;
-                win.postMessage("Submit", "*");
-                console.log('submitting');
-            }
-            } else {
-                this.test = '1';
-                return;
-            }
-            this.response = '0';
-            this.test = '0';
-        },*/
 
         overlay : function(elId, show, observe) {
             if (typeof(show) == 'undefined') { show = true; }
@@ -1413,68 +1430,4 @@ define([
             }
         }
     };
-
-    window.OrderFormArea = Class.create();
-    OrderFormArea.prototype = {
-        _name: null,
-        _node: null,
-        _parent: null,
-        _callbackName: null,
-
-        initialize: function(name, node, parent){
-            if(!node)
-                return;
-            this._name = name;
-            this._parent = parent;
-            this._callbackName = node.callback;
-            if (typeof this._callbackName == 'undefined') {
-                this._callbackName = name + 'Loaded';
-                node.callback = this._callbackName;
-            }
-            parent[this._callbackName] = parent[this._callbackName].wrap((function (proceed){
-                proceed();
-                this.onLoad();
-            }).bind(this));
-
-            this.setNode(node);
-        },
-
-        setNode: function(node){
-            if (!node.callback) {
-                node.callback = this._callbackName;
-            }
-            this.node = node;
-        },
-
-        onLoad: function(){
-        }
-    };
-
-    window.ControlButton = Class.create();
-
-    ControlButton.prototype = {
-        _label: '',
-        _node: null,
-
-        initialize: function(label){
-            this._label = label;
-            this._node = new Element('button', {
-                'class': 'action-secondary action-add',
-                'type':  'button'
-            });
-        },
-
-        onClick: function(){
-        },
-
-        insertIn: function(element, position){
-            var node = Object.extend(this._node),
-                content = {};
-            node.observe('click', this.onClick);
-            node.update('<span>' + this._label + '</span>');
-            content[position] = node;
-            Element.insert(element, content);
-        }
-    };
-
 });

@@ -6,10 +6,10 @@
  */
 -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-	<head>
-        <css src="BluePay_Payment::css/styles-m.css" />
+    <head>
+        <!--<css src="BluePay_Payment::css/styles-m.css" />
         <css src="BluePay_Payment::css/styles-l.css" media="screen and (min-width: 768px)"/>
-        <css src="BluePay_Payment::css/print.css" media="print" />
+        <css src="BluePay_Payment::css/print.css" media="print" />-->
     </head>
     <body>
         <referenceBlock name="order_create_billing_form">

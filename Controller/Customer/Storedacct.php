@@ -21,8 +21,6 @@ class Storedacct extends \Magento\Framework\App\Action\Action
 
     private $response;
 
-    private $url;
-
     private $customerSession;
 
     private $customerRegistry;
@@ -34,7 +32,6 @@ class Storedacct extends \Magento\Framework\App\Action\Action
         \Magento\Customer\Model\CustomerRegistry $customerRegistry,
         \Magento\Framework\App\Request\Http $request,
         \Magento\Framework\App\Response\Http $response,
-        \Magento\Framework\UrlInterface $url,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory,
         \Magento\Framework\HTTP\ZendClientFactory $zendClientFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfiguration
@@ -44,7 +41,6 @@ class Storedacct extends \Magento\Framework\App\Action\Action
         $this->customerRegistry = $customerRegistry;
         $this->request = $request;
         $this->response = $response;
-        $this->url = $url;
         $this->resultPageFactory = $resultPageFactory;
         $this->zendClientFactory = $zendClientFactory;
         $this->scopeConfiguration = $scopeConfiguration;
@@ -53,7 +49,7 @@ class Storedacct extends \Magento\Framework\App\Action\Action
     public function execute()
     {
         if (!$this->customerSession->isLoggedIn()) {
-            $this->customerSession->setAfterAuthUrl($this->url->getCurrentUrl());
+            $this->customerSession->setAfterAuthUrl($this->_url->getCurrentUrl());
             $this->customerSession->authenticate();
         }
         $resultPage = $this->resultPageFactory->create();
@@ -66,7 +62,7 @@ class Storedacct extends \Magento\Framework\App\Action\Action
             $messageBlock->getMessageCollection()->clear();
         } else {
             $messageBlock = $resultPage->getLayout()->createBlock(
-                'Magento\Framework\View\Element\Messages',
+                'Magento\Framework\View\Element\Messages', 
                 'result'
             );
         }
@@ -75,10 +71,14 @@ class Storedacct extends \Magento\Framework\App\Action\Action
             return $resultPage;
         } else if ($this->getRequest()->getParams()['result'] == "3") {
             $messageBlock->addSuccess('Payment account successfully deleted.');
-        } elseif ($this->getRequest()->getParams()['result'] == "APPROVED") {
+        } else if (strtoupper($this->getRequest()->getParams()['result']) == "APPROVED") {
             $messageBlock->addSuccess('Payment account successfully saved.');
-        } else {
-$messageBlock->addError('An error occurred when saving the payment account. Reason: ' .
+        } else if (
+            strtoupper($this->getRequest()->getParams()['result']) == "MISSING" || 
+            strtoupper($this->getRequest()->getParams()['result']) == "ERROR" ||
+            $this->getRequest()->getParams()['result'] == "0"
+        ) {
+            $messageBlock->addError('An error occurred when saving the payment account. Reason: ' .
             $this->getRequest()->getParams()['message']);
         }
         $resultPage->getLayout()->setChild(

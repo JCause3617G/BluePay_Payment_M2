@@ -97,7 +97,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
      *
      * @var array
      */
-    public $_debugReplacePrivateDataKeys = ['ach_account'];
+    public $_debugReplacePrivateDataKeys = ['ach_account', 'cc_num'];
 
     private $customerRegistry;
 
@@ -129,11 +129,6 @@ class Payment extends \Magento\Payment\Model\Method\Cc
      */
     private $responseFactory;
 
-    /**
-    * @var EventManager
-    */
-    private $eventManager;
-
     protected $messageManager;
 
     public function __construct(
@@ -156,7 +151,6 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         \BluePay\Payment\Model\Request\Factory $requestFactory,
         \BluePay\Payment\Model\Response\Factory $responseFactory,
         \Magento\Framework\HTTP\ZendClientFactory $zendClientFactory,
-        \Magento\Framework\Event\ManagerInterface $eventManager,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = []
@@ -170,7 +164,6 @@ class Payment extends \Magento\Payment\Model\Method\Cc
         $this->requestFactory = $requestFactory;
         $this->responseFactory = $responseFactory;
         $this->zendClientFactory = $zendClientFactory;
-        $this->eventManager = $eventManager;
         $this->messageManager = $messageManager;
 
         parent::__construct(
@@ -248,6 +241,7 @@ class Payment extends \Magento\Payment\Model\Method\Cc
     
     public function authorize(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
+        $order = $payment->getOrder();
         if ($amount <= 0) {
             throw new \Magento\Framework\Exception\LocalizedException(__('Invalid amount for authorization.'));
         }
@@ -263,8 +257,10 @@ class Payment extends \Magento\Payment\Model\Method\Cc
             ->setCcTransId($result->getRrno())
             ->setCcAvsStatus($result->getAvs())
             ->setCcCidStatus($result->getCvv2());
+        if ($payment->getCcTransId() == '')
+            $payment->setCcTransId($result->getToken());
         if ($payment->getCcType() == '') {
-$payment->setCcType($result->getCardType());
+            $payment->setCcType($result->getCardType());
         }
         if ($payment->getCcLast4() == '') {
             $payment->setCcLast4(substr($result->getCcNumber(), -4));
@@ -296,13 +292,13 @@ $payment->setCcType($result->getCardType());
      */
     public function capture(\Magento\Payment\Model\InfoInterface $payment, $amount)
     {
-    $payment->setAmount($amount);
+        $payment->setAmount($amount);
         if ($payment->getCcTransId()) {
             $payment->setTransactionType(self::REQUEST_TYPE_CAPTURE_ONLY);
         } else {
             $payment->setTransactionType(self::REQUEST_TYPE_AUTH_CAPTURE);
         }
-    $payment->setRrno($payment->getCcTransId());
+        $payment->setRrno($payment->getCcTransId());
         $request = $this->_buildRequest($payment);
         $result = $this->_postRequest($request);
         if ($result->getResult() == self::RESPONSE_CODE_APPROVED) {
@@ -315,15 +311,16 @@ $payment->setCcType($result->getCardType());
             }
             $payment->setLastTransId($result->getRrno());
             if (!$payment->getParentTransactionId() || $result->getRrno() != $payment->getParentTransactionId()) {
-                $payment->setTransactionId($result->getRrno());
+                $transId = $result->getRrno() != '' ? $result->getRrno() : $result->getToken();
+                $payment->setTransactionId($transId);
             }
             return $this;
         }
-    switch ($result->getResult()) {
+        switch ($result->getResult()) {
         case self::RESPONSE_CODE_DECLINED:
             throw new \Magento\Framework\Exception\LocalizedException(__('The transaction has been declined.'));
         case self::RESPONSE_CODE_ERROR:
-            if ($result->getMessage() == 'Already%20Captured') {
+            if ($result->getMessage() == 'Already Captured') {
                 $payment->setTransactionType(self::REQUEST_TYPE_AUTH_CAPTURE);
                 $request=$this->_buildRequest($payment);
                 $result =$this->_postRequest($request);
@@ -408,30 +405,32 @@ $payment->setCcType($result->getCardType());
      */
     public function _buildRequest(\Magento\Payment\Model\InfoInterface $payment)
     {
-        if ($payment->getIframe() == "1" || $payment->getAdditionalInformation('iframe') == "1")
+        if ($payment->getTransactionType() != "REFUND" && ($payment->getIframe() == "1" || $payment->getAdditionalInformation('iframe') == "1") && $payment->getTransactionType() != "CAPTURE")
             return $payment;
         $order = $payment->getOrder();
         $this->setStore($order->getStoreId());
         $request = $this->requestFactory->create();
-        if (!$payment->getPaymentType() || $payment->getPaymentType() == 'CC') {
+        if (!$payment->getAdditionalInformation('payment_type') || $payment->getAdditionalInformation('payment_type') == 'CC') {
             $payment->setPaymentType(self::REQUEST_METHOD_CC);
         } else {
             $payment->setPaymentType(self::REQUEST_METHOD_ECHECK);
         }
         $request = $this->requestFactory->create();
         if ($order && $order->getIncrementId()) {
-            $request->setInvoiceId($order->getIncrementId());
+            $request->setOrderId($order->getIncrementId());
         }
         $request->setMode(($this->getConfigData('trans_mode') == 'TEST') ? 'TEST' : 'LIVE');
         $request->setTpsHashType('SHA512');
-    if ($payment->getToken() != '' && !$payment->getRrno()) {
-        $request->setRrno($payment->getToken());
-        $payment->setRrno($payment->getToken());
-    }
-
+        if ($payment->getToken() != '' && !$payment->getRrno()) {
+            $request->setRrno($payment->getToken());
+            $payment->setRrno($payment->getToken());
+        } else if ($payment->getAdditionalInformation('token') != '' && !$payment->getRrno()) {
+            $request->setRrno($payment->getAdditionalInformation('token'));
+            $payment->setRrno($payment->getAdditionalInformation('token'));
+        }
         $request->setMerchant($this->getConfigData('account_id'))
             ->setTransactionType($payment->getTransactionType())
-            ->setPaymentType($payment->getPaymentType())
+            ->setPaymentType($payment->getAdditionalInformation('payment_type'))
             ->setResponseversion('3')
             ->setTamperProofSeal($this->calcTPS($payment));
         if ($payment->getAmount()) {
@@ -453,14 +452,55 @@ $payment->setCcType($result->getCardType());
         $session = $this->checkoutSession;
 
         $comment = "";
+        // $i = 1;
+        // foreach ($order->getAllItems() as $item) {
+        //     $comment .= $item->getQtyOrdered() . ' ';
+        //     $comment .= '[' . $item->getSku() . ']' . ' ';
+        //     $comment .= $item->getName() . ' ';
+        //     $comment .= $item->getDescription() . ' ';
+        //     $comment .= $item->getPrice() . ' ';
 
-        foreach ($session->getQuote()->getAllItems() as $item) {
-            $comment .= $item->getQty() . ' ';
-            $comment .= '[' . $item->getSku() . ']' . ' ';
-            $comment .= $item->getName() . ' ';
-            $comment .= $item->getDescription() . ' ';
-            $comment .= $item->getAmount() . ' ';
-        }
+        //     $tax = round($item->getPrice() * ($item->getTaxPercent() / 100), 2);
+
+        //     $request["lv3_item".$i."_product_code"] = $item->getSku();
+        //     $request["lv3_item".$i."_unit_cost"] = $item->getPrice();
+        //     $request["lv3_item".$i."_quantity"] = $item->getQtyOrdered();
+        //     $request["lv3_item".$i."_item_descriptor"] = $item->getName();
+        //     $request["lv3_item".$i."_measure_units"] = 'EA';
+        //     $request["lv3_item".$i."_commodity_code"] = '-';
+        //     $request["lv3_item".$i."_tax_amount"] = $tax;
+        //     $request["lv3_item".$i."_tax_rate"] = $item->getTaxPercent() . '%';
+        //     $request["lv3_item".$i."_item_discount"] = '';
+        //     $request["lv3_item".$i."_line_item_total"] = $item->getPrice() * $item->getQtyOrdered() + $tax;
+        //     $i++;
+        // }
+
+        // Add information for level 2 processing
+        $item = $order->getAllItems()[0];
+        $firstName = $order->getBillingAddress()["firstname"] != null ? $order->getBillingAddress()["firstname"] : "";
+        $lastName = $order->getBillingAddress()["lastname"] != null ? $order->getBillingAddress()["lastname"] : "";
+        $billName = ($firstName != "" && $lastName != "") ? $firstName . " " . $lastName : $firstName . $lastName;
+        $firstName = $order->getShippingAddress()["firstname"] != null ? $order->getShippingAddress()["firstname"] : "";
+        $lastName = $order->getShippingAddress()["lastname"] != null ? $order->getShippingAddress()["lastname"] : "";
+        $shipName = ($firstName != "" && $lastName != "") ? $firstName . " " . $lastName : $firstName . $lastName;
+
+        $request["AMOUNT_TAX"] = $order->getTaxAmount() != null ? $order->getTaxAmount() : "";
+        $request["LV2_ITEM_TAX_RATE"] = $item->getTaxPercent() . "%";
+        $request["LV2_ITEM_SHIPPING_AMOUNT"] = $order->getShippingAmount() != null ? $order->getShippingAmount() : "";
+        $request["LV2_ITEM_DISCOUNT_AMOUNT"] = $order->getDiscountAmount() != null ? $order->getDiscountAmount() : "";
+        $request["LV2_ITEM_TAX_ID"] = $order->getCustomerTaxvat() != null ? $order->getCustomerTaxvat() : "";;
+        $request["LV2_ITEM_BUYER_NAME"] = $billName;
+        $request["LV2_ITEM_SHIP_NAME"] = $shipName;
+        $request["LV2_ITEM_SHIP_ADDR1"] = $order->getShippingAddress()["street"] != null ? $order->getShippingAddress()["street"] : "";
+        $request["LV2_ITEM_SHIP_CITY"] = $order->getShippingAddress()["city"] != null ? $order->getShippingAddress()["city"] : "";
+        $request["LV2_ITEM_SHIP_STATE"] = $order->getShippingAddress()["region"] != null ? $order->getShippingAddress()["region"] : "";
+        $request["LV2_ITEM_SHIP_ZIP"] = $order->getShippingAddress()["post_code"] != null ? $order->getShippingAddress()["post_code"] : "";
+        $request["LV2_ITEM_SHIP_COUNTRY"] = $order->getShippingAddress()["country_id"] != null ? $order->getShippingAddress()["country_id"] : "";
+
+        // Add customer IP address
+        $om = \Magento\Framework\App\ObjectManager::getInstance();
+        $a = $om->get('Magento\Framework\HTTP\PhpEnvironment\RemoteAddress');
+        $request["CUSTOMER_IP"] = $a->getRemoteAddress();
 
         if (!empty($order)) {
             $billing = $order->getBillingAddress();
@@ -494,9 +534,9 @@ $payment->setCcType($result->getCardType());
                 break;
 
             case self::REQUEST_METHOD_ECHECK:
-                $request->setAchRouting($info->getEcheckRoutingNumber())
-                    ->setAchAccount($info->getEcheckAcctNumber())
-                    ->setAchAccountType($info->getEcheckAcctType())
+                $request->setAchRouting($info->getAdditionalInformation('echeck_routing_number'))
+                    ->setAchAccount($info->getAdditionalInformation('echeck_account_number'))
+                    ->setAchAccountType($info->getAdditionalInformation('echeck_acct_type'))
                     ->setDocType('WEB');
                 break;
         }
@@ -507,7 +547,7 @@ $payment->setCcType($result->getCardType());
     {
         $info = $this->getInfoInstance();
         $result = $this->responseFactory->create();
-        if ($info->getIframe() == "1") {
+        if ($info->getIframe() == "1" && $info->getTransactionType() != "CAPTURE") {
             $result->setResult($info->getResult());
             $result->setMessage($info->getMessage());
             $result->setRrno($info->getToken());
@@ -518,14 +558,13 @@ $payment->setCcType($result->getCardType());
             $result->setAvs($info->getAvs());
             $result->setCvv2($info->getCvv2());
             $this->assignBluePayToken($result->getRrno());
-        } else if ($info->getAdditionalInformation('iframe') == "1") {
+        } else if ($info->getAdditionalInformation('iframe') == "1" && ($info->getTransactionType() != "CAPTURE" && $info->getTransactionType() != "REFUND")) {
             $result->setResult($info->getAdditionalInformation('result'));
             $result->setMessage($info->getAdditionalInformation('message'));
             $result->setRrno($info->getAdditionalInformation('trans_id'));
             $result->setToken($info->getAdditionalInformation('token'));
             $result->setPaymentAccountMask($info->getAdditionalInformation('payment_account_mask'));
             $result->setCcNumber($info->getAdditionalInformation('cc_number'));
-            error_log(print_r($info->getAdditionalInformation(),1));
             $result->setCcExpires($info->getAdditionalInformation('cc_exp_month') . $info->getAdditionalInformation('cc_exp_year'));
             $result->setPaymentType($info->getAdditionalInformation('payment_type'));
             $result->setCardType($info->getAdditionalInformation('card_type'));
@@ -605,6 +644,11 @@ $payment->setCcType($result->getCardType());
                 $this->_debug($debugData);
             }
         }
+        if (($info->getIframe() == "1" || $info->getAdditionalInformation('iframe') == "1") && $this->getConfigData('debug')) {
+            $debugData = clone $result;
+            $debugData = ['result' => $debugData];
+            $this->_debug($debugData);
+        }
         if ($result->getResult() == 'APPROVED') {
             $this->saveCustomerPaymentInfo($result);
         }
@@ -673,7 +717,7 @@ $payment->setCcType($result->getCardType());
      */
     public function _wrapGatewayError($text)
     {
-        return __('Gateway error: %s', $text);
+        return __('Gateway error: ' . $text);
     }
     
     final public function calcTPS(\Magento\Payment\Model\InfoInterface $payment)
@@ -830,7 +874,7 @@ $payment->setCcType($result->getCardType());
 
     public function assignData(\Magento\Framework\DataObject $data)
     {
-        $this->eventManager->dispatch(
+        $this->_eventManager->dispatch(
             'payment_method_assign_data_' . $this->getCode(),
             [
                 Observer\DataAssignObserver::METHOD_CODE => $this,
@@ -838,7 +882,6 @@ $payment->setCcType($result->getCardType());
                 Observer\DataAssignObserver::DATA_CODE => $data
             ]
         );
-
         $infoInstance = $this->getInfoInstance();
         $infoInstance->setAdditionalInformation('token', $infoInstance->getToken());
         $infoInstance->setAdditionalInformation('trans_id', $infoInstance->getTransID());
@@ -858,7 +901,7 @@ $payment->setCcType($result->getCardType());
         $infoInstance->setAdditionalInformation('card_type', $infoInstance->getCardType());
         $infoInstance->setAdditionalInformation('iframe', $infoInstance->getIframe());
 
-        $this->eventManager->dispatch(
+        $this->_eventManager->dispatch(
             'payment_method_assign_data',
             [
                 Observer\DataAssignObserver::METHOD_CODE => $this,
@@ -905,6 +948,8 @@ $payment->setCcType($result->getCardType());
             return;
         }
         $customerId = $this->checkoutSession->getQuote()->getCustomerId();
+        if (!$customerId)
+            return;
         $customer = $this->customerRegistry->retrieve($customerId);
         $customerData = $customer->getDataModel();
         $paymentAcctString = $customerData->getCustomAttribute('bluepay_stored_accts') ?
@@ -913,7 +958,6 @@ $payment->setCcType($result->getCardType());
         $newToken = $result->getRrno();
         $newCardType = $result->getCardType();
         $newPaymentAccount = $result->getPaymentAccountMask();
-        error_log($result->getCcExpires());
         $newCcExpMonth = substr($result->getCcExpires(), 0, 2);
         $newCcExpYear = substr($result->getCcExpires(), 2, 2);
         $paymentType = $info->getPaymentType() != "" ? $info->getPaymentType() : $info->getAdditionalInformation('payment_type');
@@ -964,5 +1008,10 @@ $payment->setCcType($result->getCardType());
         $customerData->setCustomAttribute('bluepay_stored_accts', $paymentAcctString);
         $customer->updateData($customerData);
         $customer->save();
+    }
+
+    public function validateCcNum($ccNumber)
+    {
+        return true;
     }
 }
